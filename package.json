@@ -1,0 +1,72 @@
+{
+  "name": "portfolio",
+  "version": "0.1.0",
+  "private": false,
+  "author": "linhjunior205",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/linhjunior205/my-portfolio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/linhjunior205/my-portfolio/issues"
+  },
+  "homepage": "https://github.com/linhjunior205/my-portfolio#readme",
+  "scripts": {
+    "dev": "next dev",
+    "build": "npm run generate-search && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "generate-search": "npx tsx scripts/generate-blog-data.ts",
+    "new-blog": "npx tsx scripts/create-blog.ts",
+    "new-project": "ts-node scripts/create-project.ts"
+  },
+  "dependencies": {
+    "@mdx-js/loader": "^3.0.0",
+    "@mdx-js/react": "^3.0.0",
+    "@next/mdx": "^14.2.35",
+    "@next/swc-wasm-nodejs": "^14.2.33",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@types/mdx": "^2.0.10",
+    "@types/react": "18.2.22",
+    "@types/react-dom": "18.2.7",
+    "@types/three": "^0.158.3",
+    "@vercel/analytics": "^1.5.0",
+    "autoprefixer": "10.4.15",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.0.0",
+    "cursor-effects": "^1.0.17",
+    "date-fns": "^3.6.0",
+    "embla-carousel-react": "^8.6.0",
+    "eslint": "8.49.0",
+    "eslint-config-next": "^14.2.35",
+    "framer-motion": "^10.16.16",
+    "fuse.js": "^7.0.0",
+    "gray-matter": "^4.0.3",
+    "lucide-react": "^0.446.0",
+    "next": "^14.2.35",
+    "next-mdx-remote": "^6.0.0",
+    "next-themes": "^0.3.0",
+    "postcss": "8.4.30",
+    "prism-react-renderer": "^2.4.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "recharts": "^2.12.7",
+    "rehype-highlight": "^7.0.0",
+    "remark": "^15.0.1",
+    "remark-gfm": "^4.0.0",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss": "3.3.3",
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.158.0",
+    "vaul": "^0.9.9"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.2"
+  }
+}
