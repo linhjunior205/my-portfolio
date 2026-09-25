@@ -25,7 +25,7 @@ export const baseInfo = {
     shortName: "Linhjr",
     role: "Full Stack Developer",
     careerStartDate: "2025-03",
-    portfolioURL: "https://linhjr.is-a.dev",
+    portfolioURL: "https://linhjr205-portfolio.vercel.app",
     avatar: "/images/avatar.jpg",
     email: "linhmedia2005@gmail.com",
     phone: "+84 766558382",

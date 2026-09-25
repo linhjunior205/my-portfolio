@@ -2,7 +2,7 @@
 
 A modern, responsive portfolio website built with Next.js 13, React, TypeScript, and TailwindCSS. This repository serves both as my personal portfolio website and as an open-source template that others can use for their own portfolios.
 
-> **Live Demo**: [linhjr.is-a.dev](https://linhjr.is-a.dev)
+> **Live Demo**: [linhjr205-portfolio.vercel.app](https://linhjr205-portfolio.vercel.app)
 
 ## About
 

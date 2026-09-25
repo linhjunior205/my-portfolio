@@ -32,7 +32,7 @@ Search does **not** read MDX at runtime. `scripts/generate-blog-data.ts` calls `
 Custom MDX element mappings live in `app/mdx-component.tsx` (`useMDXComponents`): fenced code blocks route through `components/mdx/CodeSnippet`, headings get anchor links via `LinkHeading`, plus custom `Image` and `Carousel` components usable directly in MDX. `next.config.js` wires `@next/mdx` with `remark-gfm` and `rehype-highlight` and registers `.md`/`.mdx` as page extensions.
 
 ### Static export config
-`next.config.js` sets `trailingSlash: true`, `images.unoptimized: true`, and `eslint.ignoreDuringBuilds: true` — the site is built for static hosting (deployed at linhjr.is-a.dev), so avoid features that require a Node server at runtime.
+`next.config.js` sets `trailingSlash: true`, `images.unoptimized: true`, and `eslint.ignoreDuringBuilds: true` — the site is built for static hosting (deployed at linhjr205-portfolio.vercel.app), so avoid features that require a Node server at runtime.
 
 ### Personal data
 All personal/site content (name, contact, socials, work `experiences[]`) is centralized in `content/informations/info.ts` as `baseInfo` and `experiences`. Components and page metadata import `baseInfo` from here rather than hardcoding.
