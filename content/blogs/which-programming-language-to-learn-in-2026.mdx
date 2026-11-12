@@ -1,0 +1,111 @@
+---
+title: "TypeScript, Python, Go or Rust? Choosing a Programming Language in 2026"
+summary: "A practical comparison of the four languages that dominate modern job postings and open source, with what each one is best at and who should learn it first."
+publishedAt: "2026-10-15"
+readTime: "7 min read"
+tags: ["Programming Languages", "TypeScript", "Python", "Go", "Rust", "Career"]
+featured: false
+image: "/images/blogs/which-programming-language-to-learn-in-2026/cover.png"
+author: "Linh Junior"
+---
+
+## There is no "best" language
+
+"Which language should I learn?" is one of the most common questions from new developers. The honest answer is: **it depends on what you want to build.** But in 2026, four languages cover most of what the industry needs: **TypeScript, Python, Go and Rust**. Here is how they compare.
+
+## TypeScript – the language of products
+
+**Best for:** web frontends, backend APIs, full-stack apps, mobile with React Native, serverless functions.
+
+TypeScript became the most used language on GitHub in 2025 according to the Octoverse report. With React, Next.js, NestJS and Node.js, one language can run your entire product.
+
+```ts
+// A typed API handler in Next.js (App Router)
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const page = Number(searchParams.get("page") ?? 1);
+  const posts = await db.post.findMany({ skip: (page - 1) * 10, take: 10 });
+  return Response.json(posts);
+}
+```
+
+**Learn it first if** you want to build web products or work at startups and agencies.
+
+## Python – the language of AI and data
+
+**Best for:** machine learning, data analysis, automation scripts, AI agent backends, scientific computing.
+
+Python's ecosystem — PyTorch, pandas, NumPy, FastAPI and nearly every AI SDK — is unmatched. If your work touches models or data pipelines, you will meet Python.
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
+```
+
+**Learn it first if** you are interested in AI/ML, data engineering, or automation.
+
+## Go – the language of cloud infrastructure
+
+**Best for:** microservices, CLIs, networking, DevOps tooling, high-concurrency backends.
+
+Docker, Kubernetes, Terraform and Prometheus are all written in Go. It is simple, compiles to a single binary, starts fast and handles concurrency well with goroutines.
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "ok")
+	})
+	http.ListenAndServe(":8080", nil)
+}
+```
+
+**Learn it first if** you like backend systems, platform engineering or DevOps.
+
+## Rust – the language of performance and safety
+
+**Best for:** systems programming, performance-critical services, WebAssembly, developer tooling, embedded.
+
+Rust gives C/C++-level performance with memory safety enforced by the compiler. Many modern JavaScript tools (such as SWC, Turbopack and Biome) are written in Rust, and it is increasingly used in operating systems and browsers.
+
+```rust
+fn main() {
+    let numbers = vec![1, 2, 3, 4, 5];
+    let total: i32 = numbers.iter().map(|n| n * n).sum();
+    println!("Sum of squares: {}", total);
+}
+```
+
+**Learn it first if** you enjoy low-level programming and are ready for a steeper learning curve. For most beginners it works better as a second or third language.
+
+## Quick decision guide
+
+- **I want a job building websites or apps** → TypeScript.
+- **I want to work in AI / data** → Python.
+- **I want to build cloud infrastructure or high-scale backends** → Go.
+- **I want to build fast, low-level software** → Rust.
+- **I don't know yet** → TypeScript or Python. Both have huge job markets and gentle learning curves.
+
+## Does AI make the choice less important?
+
+Partly. AI agents can translate code between languages and write boilerplate in any of them. But to **review** that code you still need to understand the language's idioms, its type system, its concurrency model and its ecosystem. AI makes it easier to *write* a second language; it does not remove the need to *understand* one deeply.
+
+My advice: pick one language that matches your goals, go deep enough to build and deploy real projects, then add a second language that complements it. A common, very employable combination in 2026 is **TypeScript for the product + Python for AI work**, or **TypeScript + Go** for backend-heavy teams.
+
+### References
+
+- [GitHub Blog – Octoverse 2025](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/)
+- [The Go Programming Language](https://go.dev)
+- [The Rust Programming Language](https://www.rust-lang.org)
+- [FastAPI documentation](https://fastapi.tiangolo.com)
