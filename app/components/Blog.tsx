@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Calendar, Clock, ArrowRight, BookOpen, Tag } from 'lucide-react';
-import Fuse from 'fuse.js';
 import Link from 'next/link';
 import { useSearch } from '@/hooks/useSearch';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -19,18 +18,34 @@ interface BlogPost {
   image: string;
 }
 
+const MAX_TAGS = 10;
+
 export default function Blog() {
   const [selectedTag, setSelectedTag] = useState<string>('All');
   const {
     query,
     results,
+    allPosts,
     handleSearchChange,
   } = useSearch({ maxResults: 20, threshold: 0.4 });
 
-  const allTags = ['All', 'JavaScript', 'React', 'Next.js', 'CSS', 'Web Development', 'AI', 'Q&A'];
+  // Build the tag list from the posts themselves, most used first
+  const allTags = useMemo(() => {
+    const counts = new Map<string, number>();
+    allPosts.forEach(post => post.tags?.forEach(tag => counts.set(tag, (counts.get(tag) ?? 0) + 1)));
+    const sorted = Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([tag]) => tag)
+      .slice(0, MAX_TAGS);
+    return ['All', ...sorted];
+  }, [allPosts]);
 
-  const featuredPosts = results.filter(post => post.featured);
-  const regularPosts = results.filter(post => !post.featured);
+  const filteredPosts = selectedTag === 'All'
+    ? results
+    : results.filter(post => post.tags?.includes(selectedTag));
+
+  const featuredPosts = filteredPosts.filter(post => post.featured);
+  const regularPosts = filteredPosts.filter(post => !post.featured);
 
   return (
     <section id="blog" className="py-20 px-4 relative">
@@ -67,7 +82,8 @@ export default function Blog() {
             {allTags.map((tag, index) => (
               <motion.button
                 key={tag}
-                onClick={() => handleSearchChange(tag)}
+                onClick={() => setSelectedTag(tag)}
+                aria-pressed={selectedTag === tag}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   selectedTag === tag
                     ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg'
@@ -282,7 +298,7 @@ export default function Blog() {
             )}
 
             {/* No Results */}
-            {results.length === 0 && (
+            {filteredPosts.length === 0 && (
               <motion.div
                 className="text-center py-16"
                 initial={{ opacity: 0, scale: 0.9 }}
