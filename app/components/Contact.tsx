@@ -2,9 +2,15 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Mail, MapPin, Phone, Github, Linkedin, Facebook, MessageCircle, Section } from 'lucide-react';
+import { Send, Mail, MapPin, Phone, Github, Linkedin, Facebook, MessageCircle, CheckCircle2, AlertCircle } from 'lucide-react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { baseInfo } from '@/content/informations/info';
+
+// Public access key from https://web3forms.com (safe to expose in client code).
+// When it is not set, the form falls back to opening the visitor's email app.
+const WEB3FORMS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY;
+
+type SubmitStatus = 'idle' | 'success' | 'mailto' | 'error';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -14,15 +20,53 @@ export default function Contact() {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<SubmitStatus>('idle');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const openMailClient = () => {
+    const body = `${formData.message}\n\n---\nFrom: ${formData.name} <${formData.email}>`;
+    window.location.href = `mailto:${baseInfo.email}?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setStatus('idle');
+
+    // Honeypot: real visitors never fill this hidden field
+    const honeypot = new FormData(e.currentTarget).get('botcheck');
+    if (honeypot) return;
+
+    if (!WEB3FORMS_KEY) {
+      openMailClient();
+      setStatus('mailto');
+      return;
+    }
+
     setIsSubmitting(true);
-    // Handle form submission here
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
+          from_name: `${baseInfo.shortName} Portfolio`,
+          name: formData.name,
+          email: formData.email,
+          subject: `[Portfolio] ${formData.subject}`,
+          message: formData.message,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.message || `Request failed with status ${response.status}`);
+      }
+      setStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 2000);
+    } catch (error) {
+      console.error('Contact form submission failed:', error);
+      setStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -172,6 +216,7 @@ export default function Contact() {
             viewport={{ once: true }}
           >
             <form onSubmit={handleSubmit} className="space-y-6">
+              <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" />
               <div className="grid md:grid-cols-2 gap-6">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -303,6 +348,26 @@ export default function Contact() {
                   className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300"
                 />
               </motion.button>
+
+              <div aria-live="polite">
+                {status === 'success' && (
+                  <p className="flex items-center gap-2 text-green-400">
+                    <CheckCircle2 size={18} /> Thanks! Your message has been sent. I&apos;ll get back to you soon.
+                  </p>
+                )}
+                {status === 'mailto' && (
+                  <p className="flex items-center gap-2 text-blue-300">
+                    <Mail size={18} /> Your email app should open with the message ready to send. If it didn&apos;t, email me at{' '}
+                    <a href={`mailto:${baseInfo.email}`} className="underline">{baseInfo.email}</a>.
+                  </p>
+                )}
+                {status === 'error' && (
+                  <p className="flex items-center gap-2 text-red-400">
+                    <AlertCircle size={18} /> Something went wrong.{' '}
+                    <button type="button" onClick={openMailClient} className="underline">Send via email instead</button>
+                  </p>
+                )}
+              </div>
             </form>
           </motion.div>
         </div>

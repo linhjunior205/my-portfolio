@@ -77,7 +77,7 @@ export function useSearch(options: UseSearchOptions = {}) {
         } finally {
             setLoading(false);
         }
-    }, [fuse, maxResults]);
+    }, [fuse, searchData, maxResults]);
 
     const handleSearchChange = useCallback((newQuery: string) => {
         setQuery(newQuery);
@@ -94,6 +94,7 @@ export function useSearch(options: UseSearchOptions = {}) {
     return {
         query,
         results,
+        allPosts: searchData,
         loading,
         error,
         dataLoaded,
