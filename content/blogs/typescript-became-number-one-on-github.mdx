@@ -1,0 +1,81 @@
+---
+title: "TypeScript Became #1 on GitHub: Why It Happened and What It Means"
+summary: "GitHub's Octoverse 2025 report showed TypeScript overtaking Python and JavaScript by monthly contributors. Let's look at why typed languages are winning in the AI era."
+publishedAt: "2026-11-05"
+readTime: "6 min read"
+tags: ["TypeScript", "JavaScript", "Programming Languages", "AI"]
+featured: true
+image: "/images/blogs/typescript-became-number-one-on-github/cover.png"
+author: "Linh Junior"
+---
+
+## The headline
+
+In its **Octoverse 2025** report, GitHub announced that in August 2025 **TypeScript overtook both Python and JavaScript** to become the most used language on the platform, measured by the number of monthly contributors. Coverage of the report put TypeScript at roughly 2.6 million monthly contributors, growing about 66% year over year.
+
+It is worth being precise about what that means: the ranking measures **people contributing in a language**, not lines of code, runtime usage or "best language". Python is still the king of data science and machine learning. But as a signal of where everyday application development is heading, it is a big one.
+
+## Why TypeScript is winning
+
+### 1. Frameworks made it the default
+
+Next.js, NestJS, Angular, Astro, SvelteKit, Remix and most modern starters scaffold TypeScript projects out of the box. When the default template is `.ts`, new projects are TypeScript projects.
+
+### 2. Types help AI write better code
+
+This is the interesting part of GitHub's analysis. When AI assistants generate code, **types act as a contract** that the model can read and the compiler can check. A function signature like this tells both a human and an agent exactly what is allowed:
+
+```ts
+type CreateOrderInput = {
+  userId: string;
+  items: { productId: string; quantity: number }[];
+  couponCode?: string;
+};
+
+async function createOrder(input: CreateOrderInput): Promise<Order> {
+  // ...
+}
+```
+
+If the generated code passes a `quantity` as a string or forgets `userId`, `tsc` fails immediately. That fast feedback loop is exactly what agents need to correct themselves. In a dynamically typed codebase, the same mistake might only show up at runtime.
+
+### 3. One language from database to UI
+
+With TypeScript you can share types between the backend (NestJS, Express, tRPC), the frontend (React, Next.js) and even mobile (React Native). Tools like Prisma and Drizzle generate types straight from your database schema, so a column rename becomes a compile error across the whole stack instead of a production bug.
+
+### 4. Better tooling everywhere
+
+Editor autocomplete, safe refactoring, "go to definition" in huge codebases — all of these work dramatically better with types. Node.js can now run many TypeScript files directly by stripping types, and fast tools like esbuild, SWC and Bun made the build step almost invisible.
+
+## What it means for developers
+
+- **If you write JavaScript, learn TypeScript properly.** Not just adding `: any` everywhere — learn generics, union types, narrowing and utility types like `Partial`, `Pick` and `Omit`.
+- **Turn on `strict` mode.** Most of the value of TypeScript comes from `strict: true` in `tsconfig.json`.
+- **Validate at the boundaries.** Types disappear at runtime. Use a schema library such as Zod to validate request bodies, environment variables and API responses, then infer types from those schemas.
+
+```ts
+import { z } from "zod";
+
+const SignUpSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+type SignUpInput = z.infer<typeof SignUpSchema>;
+
+export function parseSignUp(body: unknown): SignUpInput {
+  return SignUpSchema.parse(body); // throws on invalid input
+}
+```
+
+- **Python is not going anywhere.** For AI/ML, data pipelines and scripting, Python remains the practical choice. Many teams now run a TypeScript product plus Python services for model work.
+
+## Conclusion
+
+TypeScript reaching #1 on GitHub is less about hype and more about a feedback loop: frameworks default to it, types make AI-generated code safer, and safer code makes teams adopt it even more. For a full-stack developer in 2026, solid TypeScript is no longer a bonus skill — it is the baseline.
+
+### References
+
+- [GitHub Blog – Octoverse: A new developer joins GitHub every second as AI leads TypeScript to #1](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/)
+- [Visual Studio Magazine – TypeScript Tops GitHub Octoverse as AI Era Reshapes Language Choices](https://visualstudiomagazine.com/Articles/2025/10/31/TypeScript-Tops-GitHub-Octoverse-as-AI-Era-Reshapes-Language-Choices.aspx)
+- [It's FOSS – GitHub's 2025 Report Reveals Some Surprising Developer Trends](https://itsfoss.com/github-octoverse-2025/)
