@@ -1,0 +1,85 @@
+---
+title: "Classic Reads: \"Worse Is Better\" by Richard P. Gabriel (1989)"
+summary: "Why did Unix and C spread across the world while more elegant systems stayed niche? Gabriel's answer — simplicity of implementation wins — still explains which technologies succeed today."
+publishedAt: "2026-10-07"
+readTime: "6 min read"
+tags: ["Classic Reads", "Software Engineering", "Architecture"]
+featured: false
+image: "/images/blogs/classic-worse-is-better/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** is a series where I summarize influential essays in software engineering and ask what they still teach us today.
+
+## The essay
+
+**Richard P. Gabriel**, a Lisp expert and founder of the company Lucid, wrote an essay around 1989 called **"Lisp: Good News, Bad News, How to Win Big"**. One section, titled **"The Rise of Worse is Better"**, escaped the essay and became one of the most debated ideas in software design.
+
+Gabriel was trying to explain something painful for Lisp fans: why had **Unix and C** — which he saw as technically inferior — spread everywhere, while more elegant Lisp systems stayed in a niche?
+
+## Two design philosophies
+
+Gabriel compared two schools, judged on the same four qualities: **simplicity, correctness, consistency and completeness.**
+
+### "The Right Thing" (the MIT/Stanford approach)
+
+- **Correctness** and **consistency** are non-negotiable.
+- **Completeness** is very important — cover all reasonable cases.
+- **Simplicity of the interface** matters more than simplicity of the implementation. The implementer should suffer so the user does not.
+
+### "Worse is Better" (the New Jersey approach — Unix and C, from Bell Labs)
+
+- **Simplicity of implementation** comes first, even above interface simplicity.
+- Correctness and consistency matter, but can be slightly sacrificed for simplicity.
+- Completeness can be sacrificed whenever it would complicate the implementation.
+
+## The famous example
+
+Gabriel describes the "PC loser-ing" problem: what should happen when a system call is interrupted? The "Right Thing" design handles it fully inside the operating system so programs never notice. The Unix design simply returns an error code and lets the program retry — simpler to implement, slightly more work for the user.
+
+## Why "worse" wins
+
+Gabriel's argument is an evolutionary one:
+
+- A simple implementation is **easy to port** to new machines. C and Unix ran almost everywhere quickly.
+- It is **good enough** for most users, so it spreads.
+- Once it spreads, people **improve it incrementally** until it is close to the "right thing" — but now with a huge user base.
+- Meanwhile the perfect system is still being finished.
+
+This is why he famously described Unix and C as "the ultimate computer viruses": worse-is-better software spreads first and gets better later.
+
+## The twist
+
+Gabriel himself went back and forth for years, even writing rebuttals to his own essay under a pseudonym. He never fully decided whether worse-is-better was a law to embrace or a tragedy to fight. That ambivalence is part of what makes the essay worth reading.
+
+## Seeing it in 2026
+
+Once you know the pattern, you see it everywhere:
+
+- **JavaScript** – designed in a hurry, full of quirks, yet it runs everywhere and has been improved for decades.
+- **HTTP and JSON** – simple, loose formats beat more rigorous alternatives (such as SOAP and XML schemas) because they were easy to implement in any language.
+- **Markdown** – a tiny, imperfect syntax that won because anyone could write a parser.
+- **MVPs and startups** – ship the simple version that solves the core problem, then iterate.
+
+It also explains failures: projects that wait for the perfect, complete design often launch too late.
+
+## When "worse" is actually worse
+
+Worse is better is not a license for sloppiness. Some domains demand "the Right Thing":
+
+- **Security** – "good enough" authentication is not good enough.
+- **Data integrity** – losing or corrupting data is never acceptable.
+- **Public APIs and protocols** – mistakes become permanent once many clients depend on them.
+
+The skill is knowing **which parts of your system can be simple and imperfect, and which must be right.**
+
+## Takeaways
+
+- Simple, shippable implementations often beat elegant, unfinished ones.
+- Adoption and iteration can matter more than initial perfection.
+- Choose deliberately where to accept "worse" — never in security or data integrity.
+
+## Read the original
+
+- [Richard P. Gabriel – The Rise of "Worse is Better"](https://www.dreamsongs.com/RiseOfWorseIsBetter.html)
+- [Richard P. Gabriel – Worse Is Better (background and follow-ups)](https://www.dreamsongs.com/WorseIsBetter.html)

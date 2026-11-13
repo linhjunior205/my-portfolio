@@ -1,0 +1,111 @@
+---
+title: "Classic Reads: \"The Twelve-Factor App\" (2011)"
+summary: "Written by Heroku co-founder Adam Wiggins, the Twelve-Factor App defined how to build web services that deploy cleanly to the cloud. Most of it became so standard that we forget it was ever written down."
+publishedAt: "2026-09-23"
+readTime: "7 min read"
+tags: ["Classic Reads", "Cloud", "DevOps", "Backend"]
+featured: false
+image: "/images/blogs/classic-the-twelve-factor-app/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** is a series where I summarize influential essays in software engineering and ask what they still teach us today.
+
+## The document
+
+**The Twelve-Factor App** was published around **2011** by **Adam Wiggins**, co-founder of Heroku, based on what the Heroku team saw across hundreds of thousands of apps deployed to their platform. It is a short website of twelve principles for building **software-as-a-service** apps that are portable, scalable and easy to deploy.
+
+Docker did not exist yet. Kubernetes did not exist yet. Yet the document reads like a description of how we deploy containers today.
+
+## The twelve factors (with a 2026 view)
+
+### 1. Codebase
+
+One codebase tracked in version control, many deploys (dev, staging, production). *Today:* one Git repo (or a clear package in a monorepo) per deployable app.
+
+### 2. Dependencies
+
+Explicitly declare and isolate dependencies. Never rely on something "already installed on the server". *Today:* `package.json` + lockfile, `requirements.txt`, and the container image.
+
+### 3. Config
+
+Store config — anything that changes between deploys, like database URLs and API keys — in **environment variables**, not in code.
+
+```ts
+// config.ts — fail fast if required config is missing
+import { z } from "zod";
+
+export const config = z
+  .object({
+    DATABASE_URL: z.string().url(),
+    PORT: z.coerce.number().default(3000),
+    NODE_ENV: z.enum(["development", "test", "production"]),
+  })
+  .parse(process.env);
+```
+
+### 4. Backing services
+
+Treat databases, caches, queues and email providers as **attached resources** you can swap by changing a URL.
+
+### 5. Build, release, run
+
+Strictly separate the stages: **build** an artifact, combine it with config to make a **release**, then **run** it. *Today:* CI builds an image once; the same image is promoted from staging to production.
+
+### 6. Processes
+
+Run the app as one or more **stateless** processes. Anything that must persist goes to a backing service — never to local disk or memory sessions.
+
+### 7. Port binding
+
+The app is self-contained and exports HTTP by **binding to a port**, rather than being injected into an external web server.
+
+### 8. Concurrency
+
+Scale **out** by running more processes (web processes, worker processes), not just by making one process bigger.
+
+### 9. Disposability
+
+Processes start fast and **shut down gracefully** so they can be started or stopped at any moment.
+
+```ts
+process.on("SIGTERM", async () => {
+  await server.close();    // stop accepting new requests
+  await db.end();          // close connections cleanly
+  process.exit(0);
+});
+```
+
+### 10. Dev/prod parity
+
+Keep development, staging and production as similar as possible: same backing services, same versions, short time between writing code and deploying it. *Today:* Docker Compose locally, preview environments per pull request.
+
+### 11. Logs
+
+Treat logs as **event streams**: write to stdout, and let the platform collect and route them. Do not manage log files inside the app.
+
+### 12. Admin processes
+
+Run one-off tasks (migrations, data fixes) as processes in the **same environment and release** as the app.
+
+## What has aged
+
+- **Config:** environment variables are still the norm, but for real secrets most teams now use a secret manager that injects them at runtime.
+- **Logs:** structured logs plus traces and metrics (observability) go beyond "just stdout".
+- **Statelessness** is harder for real-time apps with WebSockets, which need sticky sessions or a shared pub/sub layer.
+- **Serverless and edge** platforms enforce several factors automatically.
+
+## Why it is still worth reading
+
+The Twelve-Factor App is a perfect checklist for a junior developer deploying their first real service. If your app follows these twelve rules, it will run happily on Vercel, Railway, Fly.io, Kubernetes or any cloud — and moving between them will be easy.
+
+## Takeaways
+
+- Config in the environment, secrets never in the repo.
+- Stateless processes, persistent data in backing services.
+- Build once, promote the same artifact through environments.
+- Log to stdout, shut down gracefully, keep dev and prod alike.
+
+## Read the original
+
+- [The Twelve-Factor App](https://12factor.net)

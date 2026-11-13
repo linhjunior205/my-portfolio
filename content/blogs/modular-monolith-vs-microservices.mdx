@@ -1,0 +1,109 @@
+---
+title: "Modular Monolith vs Microservices: Choosing an Architecture in 2026"
+summary: "After a decade of microservices hype, many teams are moving back to well-structured monoliths. Here is how to decide, and how to build a monolith that can be split later if you really need to."
+publishedAt: "2026-10-05"
+readTime: "8 min read"
+tags: ["Architecture", "Backend", "NestJS", "System Design"]
+featured: false
+image: "/images/blogs/modular-monolith-vs-microservices/cover.png"
+author: "Linh Junior"
+---
+
+## The pendulum swings back
+
+In the 2010s, microservices became the default answer to "how should we build this?". Netflix and Amazon used them, so everyone wanted them. Many teams then discovered the bill: dozens of repositories, network calls everywhere, distributed transactions, complex deployments and debugging across ten services for a single bug.
+
+Today the industry conversation is more balanced. Several well-known companies have publicly written about consolidating services back into larger deployable units, and the **modular monolith** has become a popular middle ground.
+
+## Definitions
+
+- **Monolith** – one deployable application. Not automatically bad; "big ball of mud" is the bad version.
+- **Modular monolith** – one deployable application, internally split into **modules with clear boundaries**. Each module owns its data and exposes a small public interface.
+- **Microservices** – many independently deployable services, each owning its data, communicating over the network.
+
+## What microservices really give you
+
+Microservices solve **organizational scaling** more than technical scaling:
+
+- **Independent deployment** – team A can ship without coordinating with team B.
+- **Independent scaling** – the image-processing service can scale separately from the API.
+- **Technology freedom** – one service in Go, another in Python.
+- **Fault isolation** – if done well, one failing service does not take down everything.
+
+## What they cost
+
+- **Network calls instead of function calls** – latency, retries, timeouts, partial failures.
+- **Data consistency** – no simple database transaction across services; you need patterns like sagas and outbox.
+- **Operational load** – CI/CD, monitoring, tracing and on-call for every service.
+- **Harder local development and testing.**
+
+If you have 5 developers, you usually pay all of these costs and get few of the benefits.
+
+## A simple decision guide
+
+Choose a **modular monolith** when:
+
+- The team is small or medium (one or a few teams).
+- The domain is still changing and boundaries are not yet clear.
+- You want to move fast with simple deployments.
+
+Consider **extracting a service** when:
+
+- A module has very different scaling or reliability needs.
+- A separate team needs to own and deploy it independently.
+- It needs a different runtime or language.
+- You have measured a real problem the monolith cannot solve.
+
+## Building a good modular monolith with NestJS
+
+NestJS modules map naturally to this style. The rules matter more than the framework:
+
+1. **One module per business capability** – `orders`, `billing`, `catalog`, `users`.
+2. **Modules talk only through public services**, never by reaching into each other's repositories or tables.
+3. **Each module owns its tables.** Other modules do not join on them directly.
+4. **Use events for side effects** across modules (for example, "order placed" triggers an email in the notifications module).
+
+```ts
+// orders/orders.module.ts
+@Module({
+  imports: [CatalogModule],           // depends only on catalog's public API
+  providers: [OrdersService, OrdersRepository],
+  exports: [OrdersService],           // the only thing other modules may use
+})
+export class OrdersModule {}
+```
+
+```ts
+// orders/orders.service.ts
+@Injectable()
+export class OrdersService {
+  constructor(
+    private readonly repo: OrdersRepository,
+    private readonly catalog: CatalogService,
+    private readonly events: EventEmitter2,
+  ) {}
+
+  async place(userId: string, items: OrderItemInput[]) {
+    const priced = await this.catalog.priceItems(items);
+    const order = await this.repo.create(userId, priced);
+    this.events.emit("order.placed", { orderId: order.id, userId });
+    return order;
+  }
+}
+```
+
+If one day `notifications` needs to become a separate service, the event becomes a message on a queue — and the rest of the code barely changes.
+
+## Enforce the boundaries
+
+Boundaries erode unless something checks them. Lint rules (for example ESLint import restrictions or dependency-cruiser) can fail the build when one module imports another module's internals. This one guardrail keeps a modular monolith from turning back into a ball of mud.
+
+## Conclusion
+
+Architecture should follow team size and real constraints, not trends. For most products, a **well-structured modular monolith** is the fastest way to ship, and it keeps the option of extracting services later. Start simple, keep boundaries clean, and split only when you can name the problem it solves.
+
+### References
+
+- [Martin Fowler – MonolithFirst](https://martinfowler.com/bliki/MonolithFirst.html)
+- [Martin Fowler – Microservice Premium](https://martinfowler.com/bliki/MicroservicePremium.html)
+- [NestJS – Modules](https://docs.nestjs.com/modules)

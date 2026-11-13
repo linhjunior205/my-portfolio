@@ -1,0 +1,110 @@
+---
+title: "How to Do Great Code Reviews (as a Reviewer and as an Author)"
+summary: "Code review is where teams share knowledge, catch bugs and keep quality high — or where they waste days and hurt feelings. Practical habits for both sides of the pull request."
+publishedAt: "2026-09-28"
+readTime: "7 min read"
+tags: ["Code Review", "Teamwork", "Career", "Best Practices"]
+featured: false
+image: "/images/blogs/how-to-do-great-code-reviews/cover.png"
+author: "Linh Junior"
+---
+
+## Why code review matters more in the AI era
+
+With AI agents generating a growing share of code, **reviewing** has become one of the most important engineering skills. Review is where a human checks that the code is correct, secure, understandable and actually solves the right problem.
+
+Google's public engineering practices guide sums up the goal well: approve a change once it **definitely improves the overall code health**, even if it is not perfect.
+
+## For authors: make your PR easy to review
+
+### Keep it small
+
+Small pull requests get faster and better reviews. A 100-line change gets real attention; a 2,000-line change gets "LGTM". Split work into steps: refactor first, then the feature, then cleanup.
+
+### Write a real description
+
+Answer three questions:
+
+- **What** changed?
+- **Why** — what problem or ticket does it solve?
+- **How was it tested?**
+
+Add screenshots for UI changes. Point out anything risky or anything you are unsure about.
+
+### Review your own diff first
+
+Read your PR in the review UI before asking others. You will catch debug logs, commented-out code and typos yourself.
+
+### Respond, don't defend
+
+Comments are about the code, not you. Answer every comment, either with a change or a short explanation. If a discussion goes back and forth more than twice, talk on a call and write the outcome in the PR.
+
+## For reviewers: what to look at
+
+Prioritize in this order:
+
+1. **Design** – Does this belong here? Is it the right approach?
+2. **Correctness** – Edge cases, error handling, concurrency, off-by-one errors.
+3. **Security** – Input validation, authorization checks, secrets, injection risks.
+4. **Tests** – Do they cover the behavior? Would they fail if the code broke?
+5. **Readability** – Names, structure, comments where intent is not obvious.
+6. **Style** – Leave this to linters and formatters as much as possible.
+
+### Pull the branch for anything non-trivial
+
+Running the code often reveals what reading the diff does not.
+
+## How to write review comments
+
+### Be specific and explain why
+
+Bad: "This is wrong."
+Good: "This query runs inside the loop, so we make one DB call per item. Could we load them all with one `WHERE id IN (...)` query before the loop?"
+
+### Label the weight of each comment
+
+Prefixes remove guesswork:
+
+- **blocking:** must be fixed before merge.
+- **suggestion:** a better option, author decides.
+- **nit:** small style point, optional.
+- **question:** I want to understand, not necessarily change.
+
+### Ask questions instead of giving orders
+
+"What happens if `items` is empty here?" invites thinking and often reveals that you misunderstood something.
+
+### Praise good things
+
+"Nice, this helper makes the controller much clearer" costs nothing and makes reviews feel collaborative.
+
+## Speed matters
+
+A PR waiting two days for review blocks the author and causes merge conflicts. Many teams aim to give a first response within **one business day**. If you cannot review fully, say so and give a time.
+
+## Reviewing AI-generated code
+
+Be extra careful with code produced by agents:
+
+- It often **looks** correct and well-formatted, which can lower your guard.
+- Check that it uses your project's existing helpers instead of re-inventing them.
+- Watch for invented APIs, missing error handling and overly broad changes.
+- Make sure tests actually test behavior, not just mirror the implementation.
+
+## A lightweight checklist
+
+- PR is small and focused, with a clear description.
+- Logic handles edge cases and errors.
+- Authorization and input validation are present.
+- Tests cover the new behavior.
+- No secrets, debug logs or dead code.
+- Names and structure are easy to follow.
+
+## Conclusion
+
+Great code review is a skill, not a gate. Authors make it easy with small, well-described PRs. Reviewers focus on what matters, explain their reasoning and respond quickly. Do both well and your team ships faster *and* learns from each other every day.
+
+### References
+
+- [Google Engineering Practices – Code Review](https://google.github.io/eng-practices/review/)
+- [Conventional Comments](https://conventionalcomments.org)

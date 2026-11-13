@@ -1,0 +1,87 @@
+---
+title: "Classic Reads: \"Go To Statement Considered Harmful\" by Edsger Dijkstra (1968)"
+summary: "A one-page letter that helped launch structured programming and gave the industry its favourite headline template. Why Dijkstra's argument about readable control flow still shapes the code we write."
+publishedAt: "2026-10-28"
+readTime: "5 min read"
+tags: ["Classic Reads", "Software Engineering", "Clean Code"]
+featured: false
+image: "/images/blogs/classic-go-to-statement-considered-harmful/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** is a series where I summarize influential essays in software engineering and ask what they still teach us today.
+
+## The letter
+
+In March 1968, **Edsger W. Dijkstra** published a short letter in *Communications of the ACM*. His original title was "A Case Against the GO TO Statement"; the editor, **Niklaus Wirth** (later the creator of Pascal), gave it the sharper title **"Go To Statement Considered Harmful"**.
+
+It is barely a page long — and it changed how programming languages and programmers think about control flow.
+
+## The argument
+
+Dijkstra's point was about **human understanding**, not performance.
+
+- A program is static text, but what matters is its **dynamic behaviour** when it runs.
+- To reason about a program, we need to connect a point in the text to the state of the running process: "when execution is *here*, what do we know is true?"
+- With **sequences, conditionals (if/else), loops and procedure calls**, you can describe the progress of the program with a small set of coordinates: where you are in the text, plus loop counters and the call stack.
+- An unrestricted **goto** lets control jump anywhere. Then knowing where you are in the text tells you very little about how you got there, and reasoning about correctness becomes extremely hard.
+
+His conclusion: the goto statement "is just too primitive; it is too much an invitation to make a mess of one's program."
+
+## The impact
+
+The letter became a rallying point for **structured programming**: building programs only from sequence, selection and iteration, plus subroutines. Over the following decades:
+
+- Languages like Pascal, C and later Java, Python and JavaScript made structured constructs the normal way to write code.
+- Many modern languages (Java, Python, JavaScript) have no general `goto` at all.
+- "X Considered Harmful" became the most copied headline format in computing — including, of course, an essay called "'Considered Harmful' Essays Considered Harmful".
+
+## Is goto always evil?
+
+Not quite. Structured alternatives for jumping out of nested code arrived later: `break`, `continue`, early `return`, and exceptions. In C, `goto` is still used in a disciplined way for cleanup paths (the Linux kernel does this). Donald Knuth's 1974 paper "Structured Programming with go to Statements" gave a more nuanced view.
+
+The lasting lesson is not "never write the word goto". It is: **control flow should make the program easy to reason about.**
+
+## Why it matters in 2026
+
+The same principle shows up everywhere in modern code:
+
+- **Callback hell → async/await.** Deeply nested callbacks made control flow hard to follow; `async/await` restored a readable, top-to-bottom structure.
+- **Early returns and guard clauses** keep functions flat and readable.
+- **Exceptions vs explicit errors.** Exceptions are structured jumps; overusing them for normal flow makes code hard to reason about, which is why many teams prefer explicit result types for expected failures.
+- **State machines and reducers** make complex flows explicit instead of scattering jumps across event handlers.
+
+```ts
+// Hard to follow: nested branches
+async function handle(req: Request) {
+  if (req.user) {
+    if (req.user.isActive) {
+      if (hasPermission(req.user)) {
+        return process(req);
+      }
+    }
+  }
+  throw new Error("Forbidden");
+}
+
+// Easier to reason about: guard clauses
+async function handleClean(req: Request) {
+  if (!req.user) throw new Error("Unauthenticated");
+  if (!req.user.isActive) throw new Error("Inactive user");
+  if (!hasPermission(req.user)) throw new Error("Forbidden");
+  return process(req);
+}
+```
+
+And with AI generating code, readable control flow matters even more: you have to **review** what the agent wrote, and tangled flow hides bugs.
+
+## Takeaways
+
+- Write code so a reader can easily tell "what is true at this line".
+- Prefer flat, structured control flow: guard clauses, small functions, clear loops.
+- Use jumps (break, return, exceptions) deliberately, not as a shortcut.
+
+## Read the original
+
+- [Dijkstra – Go To Statement Considered Harmful (EWD215, University of Texas archive)](https://www.cs.utexas.edu/~EWD/transcriptions/EWD02xx/EWD215.html)
+- [Wikipedia – Considered harmful](https://en.wikipedia.org/wiki/Considered_harmful)

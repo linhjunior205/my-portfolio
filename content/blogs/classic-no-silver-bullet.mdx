@@ -1,0 +1,65 @@
+---
+title: "Classic Reads: \"No Silver Bullet\" by Fred Brooks (1986)"
+summary: "Brooks argued that no single technology would make software development ten times more productive, because most of the difficulty is in the problem itself. Forty years and one AI boom later, the essay is more relevant than ever."
+publishedAt: "2026-11-11"
+readTime: "6 min read"
+tags: ["Classic Reads", "Software Engineering", "Career"]
+featured: false
+image: "/images/blogs/classic-no-silver-bullet/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** is a series where I summarize influential essays in software engineering and ask what they still teach us today. Read the original — this is a guide, not a replacement.
+
+## The essay
+
+**"No Silver Bullet — Essence and Accident in Software Engineering"** was written by **Fred Brooks**, the manager of IBM's System/360 and author of *The Mythical Man-Month*. He presented it in 1986 and it was published in IEEE *Computer* in 1987.
+
+Its famous claim: there is **no single development**, in technology or management technique, that by itself promises even **one order-of-magnitude** (10×) improvement in productivity, reliability or simplicity within a decade.
+
+## The key idea: essential vs accidental complexity
+
+Brooks splits the difficulty of software into two kinds:
+
+- **Accidental complexity** – difficulty caused by our tools and methods: writing assembly by hand, slow compile cycles, poor languages, clumsy environments. This can be removed.
+- **Essential complexity** – difficulty that comes from the problem itself: the intricate business rules, the many states, the interactions between parts. This cannot be removed, only managed.
+
+His argument: high-level languages, time-sharing and better environments had already removed much of the accidental complexity. What remains is mostly essential. So even a perfect new tool can only shave off the remaining accidental part — never 10×.
+
+## Four inherent properties of software
+
+Brooks lists why the essence is hard:
+
+1. **Complexity** – software has more distinct states than almost anything humans build, and complexity grows non-linearly with size.
+2. **Conformity** – software must conform to arbitrary human institutions and other systems, not to elegant natural laws.
+3. **Changeability** – software is constantly asked to change because it is "pure thought-stuff" and seems easy to change.
+4. **Invisibility** – software has no natural geometric shape we can draw, making it hard to visualize and communicate.
+
+## What he did recommend
+
+Brooks was not pessimistic. He pointed to promising directions:
+
+- **Buy rather than build** – the cheapest code is code you do not write.
+- **Requirements refinement and rapid prototyping** – the hardest part is deciding precisely what to build, so iterate with the client.
+- **Incremental development** – "grow, don't build" software: get a running skeleton early and add to it.
+- **Great designers** – invest in finding and growing people with great design skill.
+
+## Why it still matters in 2026
+
+Every few years a new technology is sold as the silver bullet: CASE tools, object-oriented programming, low-code, microservices, and now AI coding agents.
+
+AI agents are the strongest attack on **accidental** complexity we have ever had: boilerplate, syntax, API lookups and test scaffolding are dramatically cheaper. But Brooks' question remains: **is that where most of the difficulty was?** Deciding what to build, modelling a messy business domain, handling every edge case and keeping a system changeable over years are still essential complexity — and still human work.
+
+Notice that his "promising directions" read like a modern playbook: use managed services and libraries (buy, don't build), prototype quickly with users, ship incrementally, and invest in strong designers. AI makes prototypes and increments faster, which helps exactly the parts he identified.
+
+## Takeaways
+
+- Be skeptical of any tool promising 10× on its own.
+- Spend your learning time on the **essence**: domain understanding, requirements, design, trade-offs.
+- Use tools aggressively to remove **accidental** work — that frees time for the essence.
+- Grow systems incrementally and keep them changeable.
+
+## Read the original
+
+- [Fred Brooks – No Silver Bullet (PDF, University of North Carolina)](https://www.cs.unc.edu/techreports/86-020.pdf)
+- [Wikipedia – No Silver Bullet](https://en.wikipedia.org/wiki/No_Silver_Bullet)

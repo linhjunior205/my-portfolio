@@ -1,0 +1,101 @@
+---
+title: "WebAssembly Beyond the Browser: What Wasm and WASI Mean for Developers"
+summary: "WebAssembly started as a way to run fast code in the browser. Now it runs plugins, edge functions and sandboxed workloads on servers too. A beginner-friendly tour of where Wasm is useful today."
+publishedAt: "2026-09-21"
+readTime: "7 min read"
+tags: ["WebAssembly", "Rust", "Cloud", "Web Development"]
+featured: false
+image: "/images/blogs/webassembly-beyond-the-browser/cover.png"
+author: "Linh Junior"
+---
+
+## What WebAssembly is
+
+**WebAssembly (Wasm)** is a compact binary instruction format designed to run at near-native speed in a safe sandbox. You do not usually write it by hand: you compile code from languages like **Rust, C/C++, Go, Zig or C#** into a `.wasm` module.
+
+It became a W3C standard in 2019 and runs in all major browsers. Its key properties:
+
+- **Fast** – close to native speed for compute-heavy work.
+- **Portable** – the same module runs on any OS and CPU that has a Wasm runtime.
+- **Sandboxed** – a module can only access what the host explicitly gives it.
+- **Small and quick to start** – modules load in milliseconds.
+
+## In the browser
+
+Wasm shines where JavaScript struggles with heavy computation:
+
+- Image, video and audio editing in the browser.
+- Games and 3D engines.
+- Running existing C/C++ libraries on the web (codecs, PDF renderers, SQLite).
+- Design tools such as Figma, which has described using C++ compiled to WebAssembly for its rendering engine.
+
+A tiny Rust example compiled with `wasm-pack`:
+
+```rust
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn fibonacci(n: u32) -> u64 {
+    let (mut a, mut b) = (0u64, 1u64);
+    for _ in 0..n {
+        let next = a + b;
+        a = b;
+        b = next;
+    }
+    a
+}
+```
+
+```ts
+import init, { fibonacci } from "./pkg/my_wasm.js";
+
+await init();
+console.log(fibonacci(50)); // computed inside WebAssembly
+```
+
+## Outside the browser: WASI
+
+On its own, Wasm has no access to files, network or clocks. **WASI (WebAssembly System Interface)** defines standard, capability-based APIs so Wasm modules can run on servers and devices — but only with the permissions the host grants.
+
+Runtimes such as **Wasmtime** and **WasmEdge** run these modules outside the browser. The newer **Component Model** lets modules written in different languages talk to each other through typed interfaces.
+
+## Where server-side Wasm is used
+
+### Plugins and extensions
+
+Products embed a Wasm runtime so users can upload custom logic safely. The plugin cannot read your files or call the network unless you allow it. Proxies such as Envoy support Wasm filters, and many databases and tools use Wasm for user-defined functions.
+
+### Edge and serverless functions
+
+Because modules start in milliseconds and are isolated, several edge platforms run Wasm workloads close to users with very low cold-start times.
+
+### Portable, sandboxed workloads
+
+"Build once, run anywhere" for real: the same module runs on x86 and ARM servers, laptops and IoT devices.
+
+## Wasm vs containers
+
+Wasm does **not** replace Docker for most applications, but it is a good fit when you need:
+
+- Millisecond startup.
+- Strong isolation for untrusted code.
+- Very small artifacts.
+
+Containers remain better for full applications that need a complete OS environment, many system libraries or long-running services.
+
+## Should you learn it?
+
+- **Frontend developers:** know that Wasm exists for performance-critical parts and for reusing native libraries. You can call Wasm modules from JavaScript without writing Rust yourself.
+- **Backend developers:** watch Wasm for plugin systems and edge computing.
+- **If you want a deeper dive:** learning a bit of Rust and `wasm-bindgen` is the most popular path.
+
+## Conclusion
+
+WebAssembly has grown from "faster code in the browser" into a portable, secure runtime for plugins, edge functions and sandboxed workloads. You do not need to rewrite your stack in it — but knowing when it is the right tool will make you a more versatile engineer.
+
+### References
+
+- [WebAssembly.org](https://webassembly.org)
+- [WASI.dev](https://wasi.dev)
+- [MDN – WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly)
+- [Rust and WebAssembly book](https://rustwasm.github.io/docs/book/)

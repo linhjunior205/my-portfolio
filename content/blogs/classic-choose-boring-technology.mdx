@@ -1,0 +1,77 @@
+---
+title: "Classic Reads: \"Choose Boring Technology\" by Dan McKinley (2015)"
+summary: "Every team gets only a few 'innovation tokens'. Dan McKinley's essay on why proven, boring tools are usually the right choice is the best antidote to hype-driven development."
+publishedAt: "2026-09-16"
+readTime: "6 min read"
+tags: ["Classic Reads", "Architecture", "Career", "Software Engineering"]
+featured: false
+image: "/images/blogs/classic-choose-boring-technology/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** is a series where I summarize influential essays in software engineering and ask what they still teach us today.
+
+## The essay
+
+**Dan McKinley**, an engineer who spent years at Etsy, published **"Choose Boring Technology"** in **2015**, based on a talk he gave. It is short, funny and has saved many teams from expensive mistakes.
+
+## Innovation tokens
+
+The central idea: every company gets **about three innovation tokens**. You can spend them on anything new and unproven — but once they are gone, they are gone.
+
+If your product itself is innovative (a new kind of app, a new market), you have probably already spent a token. Using a brand-new database, a brand-new language **and** a brand-new deployment platform on top of that means you are betting the company on several unknowns at once.
+
+## What "boring" means
+
+Boring does not mean bad. Boring means **well understood**:
+
+- Its **failure modes are known**. When PostgreSQL or MySQL breaks, thousands of people have seen that exact problem and written about it.
+- It is **documented**, with answers already on Stack Overflow.
+- **People know it**, so hiring and onboarding are easier.
+- It has been **in production for years** under real load.
+
+New technology has **unknown unknowns** — problems nobody has discovered yet. You will discover them, in production, at the worst possible time.
+
+## The cost of many technologies
+
+McKinley's second point is about the total number of tools. Every technology you add brings ongoing costs: monitoring, upgrades, security patches, expertise, documentation. Each one is cheap alone; together they create a huge operational surface.
+
+He illustrates it with a story: adding a new tool for one problem looks locally optimal, but the **whole system** is better off solving most problems with the few tools you already run well — even if each is not the theoretically best fit.
+
+## How to add new technology responsibly
+
+The essay does not ban new things. It asks for a process:
+
+1. **Write down the problem** you are trying to solve.
+2. **Try to solve it with what you already have.** Ask: "how would we do this with our current stack?"
+3. If that is truly painful, **discuss it openly** with the team — new technology affects everyone who operates it.
+4. If you adopt it, **commit to it**: replace the old way rather than running both forever.
+
+## Boring technology in 2026
+
+The essay maps directly to today's choices:
+
+- **"Just use Postgres"** for relational data, JSON, search and even queues is the boring-technology argument in action.
+- A **modular monolith** before microservices.
+- **Mature frameworks** (Next.js, NestJS, Django, Rails, Spring) over this month's new framework for production systems.
+- **Managed services** instead of running your own clusters.
+
+And AI tools add a new angle: coding agents are **much better with boring technology**, because there is far more training data and documentation for popular, stable tools. An agent will write better PostgreSQL than code for a database released last month.
+
+## Where to spend your tokens
+
+Spend innovation tokens where they create real advantage **for your users** — usually in your core product, not in your infrastructure. If your product's value is AI-powered reading feedback, spend tokens on the AI, and keep the database, auth and deployment boring.
+
+For personal learning, the rule is different: side projects are the perfect place to play with exciting new tools.
+
+## Takeaways
+
+- You have only a few innovation tokens; spend them on what makes your product special.
+- Prefer technologies whose failure modes are well known.
+- Minimize the total number of technologies you operate.
+- Experiment freely in side projects, not in the core of production systems.
+
+## Read the original
+
+- [Dan McKinley – Choose Boring Technology](https://mcfunley.com/choose-boring-technology)
+- [Choose Boring Technology – talk slides and follow-ups](https://boringtechnology.club)

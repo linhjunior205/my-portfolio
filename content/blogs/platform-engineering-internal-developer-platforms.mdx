@@ -1,0 +1,89 @@
+---
+title: "Platform Engineering: Why Every Team Is Building an Internal Developer Platform"
+summary: "DevOps promised 'you build it, you run it'. Platform engineering is what happened when that became too much for every team to carry. Here is what an internal developer platform is and how to start small."
+publishedAt: "2026-11-12"
+readTime: "7 min read"
+tags: ["Platform Engineering", "DevOps", "Cloud", "Developer Experience"]
+featured: false
+image: "/images/blogs/platform-engineering-internal-developer-platforms/cover.png"
+author: "Linh Junior"
+---
+
+## The problem platform engineering solves
+
+DevOps broke down the wall between developers and operations. Teams that write a service also deploy it, monitor it and fix it at 2 a.m. That ownership is great — until every product team has to become expert in Kubernetes manifests, Terraform modules, secret rotation, TLS certificates, CI caching and five observability tools.
+
+The result is **cognitive overload**. Developers spend a big part of their week fighting infrastructure instead of shipping features, and every team solves the same problems slightly differently.
+
+**Platform engineering** is the response: a dedicated team builds an **internal developer platform (IDP)** that turns those recurring problems into self-service, paved roads.
+
+## What an internal developer platform actually is
+
+An IDP is not one tool. It is a product, built for internal customers (your developers), that usually combines:
+
+- **Golden paths** – opinionated templates for common things: "new NestJS service", "new Next.js app", "new cron job". One command or one form gives you a repo with CI, Dockerfile, health checks, logging and deployment already wired.
+- **Self-service infrastructure** – request a database, a queue or a preview environment without opening a ticket.
+- **A developer portal** – a single place to see services, owners, docs, API specs and on-call info. Backstage, the open-source portal originally from Spotify, is the most common starting point.
+- **Built-in guardrails** – security scanning, cost limits and policies applied automatically, so the safe way is also the easy way.
+
+## Golden paths, not golden cages
+
+The most important design rule: **make the right thing the easy thing, but do not forbid everything else.** A golden path is a recommended route with good defaults. Teams with unusual needs can leave it — they just take on the extra maintenance themselves.
+
+Platforms that force every team into one rigid workflow usually fail. Developers route around them, and the platform team becomes a bottleneck instead of an accelerator.
+
+## Treat the platform as a product
+
+Successful platform teams behave like product teams:
+
+1. **Talk to users.** Shadow developers, read support tickets, find the slowest steps between "idea" and "running in production".
+2. **Start with the biggest pain.** Often it is environment setup, slow CI or the deployment process — not a fancy portal.
+3. **Measure outcomes.** Lead time for changes, deployment frequency, time to onboard a new engineer, and plain developer satisfaction surveys.
+4. **Market and document it.** A great platform nobody knows about has zero value.
+
+## How to start small (even in a 5-person team)
+
+You do not need a platform team of twenty. Small teams can apply the same idea:
+
+- **A project template repository** with lint, tests, Dockerfile and CI already configured.
+- **One deployment path** – for example, every service deploys the same way to the same place.
+- **A `Makefile` or npm scripts** that hide long commands behind `make dev`, `make test`, `make deploy`.
+- **A short "how we build services" document** that new members actually read.
+
+```yaml
+# .github/workflows/service.yml — one reusable workflow every repo calls
+name: service
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: "22"
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint && npm test && npm run build
+```
+
+A reusable workflow like this is a tiny golden path: improve it once, and every repository benefits.
+
+## Where AI fits in
+
+Coding agents make golden paths even more valuable. When every service follows the same structure, documented in a project instructions file, an agent can scaffold, test and deploy new features far more reliably. Platform teams are increasingly exposing their self-service actions through standard interfaces such as MCP, so the same paved road serves both humans and agents.
+
+## Conclusion
+
+Platform engineering is not about building a shiny portal. It is about **reducing the cognitive load** on developers so they can focus on the product. Start with one painful workflow, pave it, measure the improvement, and grow from there.
+
+### References
+
+- [CNCF – Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)
+- [Backstage – An open platform for building developer portals](https://backstage.io)
+- [Team Topologies – Platform teams](https://teamtopologies.com/key-concepts)

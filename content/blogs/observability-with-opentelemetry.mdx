@@ -1,0 +1,121 @@
+---
+title: "Observability 101: Logs, Metrics and Traces with OpenTelemetry"
+summary: "When production breaks, observability is how you find out why. Learn the three signals, what OpenTelemetry standardizes, and how to instrument a Node.js service in a few lines."
+publishedAt: "2026-10-19"
+readTime: "8 min read"
+tags: ["Observability", "DevOps", "Node.js", "Backend"]
+featured: false
+image: "/images/blogs/observability-with-opentelemetry/cover.png"
+author: "Linh Junior"
+---
+
+## Monitoring vs observability
+
+**Monitoring** answers questions you knew to ask in advance: "Is CPU above 80%?", "Is the error rate above 1%?". **Observability** is the ability to answer questions you did *not* predict: "Why are checkout requests from mobile users in Vietnam slow only since Tuesday's deploy?"
+
+As systems became distributed — a frontend, several services, queues, third-party APIs — a single request now crosses many processes. You need data that follows the request through all of them.
+
+## The three signals
+
+### Logs
+
+Timestamped records of events. Make them **structured** (JSON), not free text, so you can filter and aggregate:
+
+```json
+{"level":"error","msg":"payment failed","orderId":"o_123","provider":"stripe","durationMs":842,"traceId":"4bf92f3577b34da6"}
+```
+
+### Metrics
+
+Numbers aggregated over time: request rate, error rate, latency percentiles, queue length. Cheap to store and great for dashboards and alerts.
+
+A good starting set for any service is **RED**: **R**ate (requests per second), **E**rrors (failed requests), **D**uration (latency, especially p95/p99).
+
+### Traces
+
+A trace follows **one request** across services. It is made of **spans** — timed operations like "HTTP GET /orders", "SELECT orders", "call payment API". Traces show exactly where time is spent and where errors start.
+
+The magic glue is the **trace ID**: put it in every log line, and you can jump from a slow trace to the exact logs of that request.
+
+## What OpenTelemetry is
+
+Before OpenTelemetry (OTel), every vendor had its own agent and format. Switching tools meant re-instrumenting your code.
+
+**OpenTelemetry** is a vendor-neutral, open-source standard from the CNCF that provides:
+
+- **APIs and SDKs** for many languages to create traces, metrics and logs.
+- **Auto-instrumentation** for popular libraries (HTTP, Express, NestJS, database drivers).
+- **OTLP**, a standard protocol to export the data.
+- The **Collector**, a service that receives, processes and forwards telemetry to any backend.
+
+You instrument **once** and can send data to Jaeger, Grafana Tempo, Prometheus, or a commercial tool — and change your mind later.
+
+## Instrumenting a Node.js service
+
+Install the SDK and auto-instrumentations:
+
+```bash
+npm install @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node \
+  @opentelemetry/exporter-trace-otlp-http
+```
+
+Create a file that starts **before** the rest of your app:
+
+```ts
+// instrumentation.ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+
+const sdk = new NodeSDK({
+  serviceName: "orders-api",
+  traceExporter: new OTLPTraceExporter({
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318/v1/traces",
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+sdk.start();
+```
+
+Run your app with it loaded first (for example `node --import ./instrumentation.js dist/main.js`). HTTP requests and database queries now produce spans automatically. Add custom spans around important business logic:
+
+```ts
+import { trace } from "@opentelemetry/api";
+
+const tracer = trace.getTracer("orders");
+
+export async function checkout(cartId: string) {
+  return tracer.startActiveSpan("checkout", async (span) => {
+    try {
+      span.setAttribute("cart.id", cartId);
+      return await processCheckout(cartId);
+    } catch (err) {
+      span.recordException(err as Error);
+      throw err;
+    } finally {
+      span.end();
+    }
+  });
+}
+```
+
+For a local playground, run Jaeger in Docker and open its UI to see your traces.
+
+## Practical advice
+
+- **Start with traces + RED metrics** on your most important user flows.
+- **Add the trace ID to logs** so all three signals connect.
+- **Alert on symptoms users feel** (error rate, latency) rather than on every CPU spike.
+- **Watch cardinality.** Do not put user IDs or full URLs as metric labels — it explodes storage costs. Put them on spans and logs instead.
+- **Never log secrets or personal data** such as passwords, tokens or full card numbers.
+
+## Conclusion
+
+Observability turns "it's broken somewhere" into "the payment call in the checkout span started timing out after deploy 4f2a". OpenTelemetry makes that possible without locking you into one vendor. Instrument one service this week — your future on-call self will thank you.
+
+### References
+
+- [OpenTelemetry – Documentation](https://opentelemetry.io/docs/)
+- [OpenTelemetry – Node.js getting started](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/)
+- [Jaeger – Distributed tracing platform](https://www.jaegertracing.io)

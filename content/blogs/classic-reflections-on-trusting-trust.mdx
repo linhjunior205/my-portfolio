@@ -1,0 +1,91 @@
+---
+title: "Classic Reads: \"Reflections on Trusting Trust\" by Ken Thompson (1984)"
+summary: "In his Turing Award lecture, the co-creator of Unix showed how a compiler could secretly insert a backdoor that leaves no trace in any source code. Forty years later, it is the foundation of software supply-chain security."
+publishedAt: "2026-09-30"
+readTime: "6 min read"
+tags: ["Classic Reads", "Security", "Software Engineering"]
+featured: false
+image: "/images/blogs/classic-reflections-on-trusting-trust/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** is a series where I summarize influential essays in software engineering and ask what they still teach us today.
+
+## The lecture
+
+In 1983, **Ken Thompson** and **Dennis Ritchie** received the Turing Award for creating Unix. Thompson's acceptance lecture, published in *Communications of the ACM* in August 1984, was only three pages long. It was called **"Reflections on Trusting Trust"**, and it is one of the most important texts in computer security.
+
+## The attack in three stages
+
+Thompson describes building, step by step, a compiler that lies.
+
+### Stage 1: A program that prints itself
+
+He starts with a puzzle: write a program that outputs its own source code (a *quine*). The point is that a program can carry a copy of itself.
+
+### Stage 2: A compiler that learns
+
+A C compiler is itself written in C. When you teach the compiler a new feature and recompile it with the old compiler, the new binary "knows" the feature — and that knowledge no longer needs to be visible in the source.
+
+### Stage 3: The Trojan horse
+
+Now the trick:
+
+1. Modify the compiler so that when it compiles the **login** program, it inserts a **backdoor** that accepts a secret password.
+2. Also modify it so that when it compiles **the compiler itself**, it inserts **both** of these modifications.
+3. Compile the compiler once with these changes. Then **remove the changes from the compiler's source code**.
+
+From now on, the compiler binary keeps re-inserting the backdoor into every new compiler and every login program — while **all the source code looks completely clean**. You can read every line and find nothing.
+
+## The moral
+
+Thompson's conclusion is famous:
+
+> "You can't trust code that you did not totally create yourself."
+
+And since nobody writes their own compiler, operating system, CPU microcode and firmware, **every system rests on trust** in tools and people. Reviewing source code is not enough if the tools that build it might be compromised.
+
+## Why it matters even more in 2026
+
+Thompson described, in 1984, what we now call a **software supply-chain attack**. Modern versions are real:
+
+- **Compromised build systems** have been used to ship malicious updates to thousands of organizations.
+- **Malicious packages** on public registries imitate popular names or hijack maintainer accounts.
+- **Backdoors hidden in build scripts or test files** of open-source libraries have been discovered only by luck.
+
+Your `node_modules` folder probably contains hundreds of packages written by people you have never met. That is exactly the trust problem Thompson described.
+
+## Modern defenses
+
+The industry's answers are direct descendants of this lecture:
+
+- **Lock files and pinned versions** – install exactly what you reviewed (`npm ci`, not `npm install` in CI).
+- **Reproducible builds** – the same source should always produce the bit-for-bit same binary, so anyone can verify it.
+- **Diverse double-compiling** – David A. Wheeler's technique to detect a "trusting trust" compiler by compiling it with a different, independent compiler.
+- **Signed artifacts and provenance** – projects like Sigstore and frameworks like SLSA record who built what, from which source, on which system.
+- **SBOMs** (software bills of materials) – a list of every component in your software so you can react when one is compromised.
+- **Least privilege in CI** – build jobs should not hold production secrets they do not need.
+
+```bash
+# Simple habits for Node.js projects
+npm ci                 # install exactly what the lockfile says
+npm audit              # check for known vulnerabilities
+npm ls --all | wc -l   # see how many packages you really trust
+```
+
+## AI adds a new layer
+
+AI coding assistants and agents are also part of the chain now. They suggest dependencies, write build scripts and run commands. Treat their suggestions like code from an unknown contributor: check that packages actually exist and are the ones you meant, and review scripts before running them.
+
+## Takeaways
+
+- Source review alone cannot guarantee safety; the tools and dependencies matter too.
+- Pin, verify and minimize your dependencies.
+- Prefer reproducible, signed builds with recorded provenance.
+- Treat every new package — suggested by a human or an AI — as a trust decision.
+
+## Read the original
+
+- [Ken Thompson – Reflections on Trusting Trust (ACM, 1984)](https://dl.acm.org/doi/10.1145/358198.358210)
+- [David A. Wheeler – Countering Trusting Trust through Diverse Double-Compiling](https://dwheeler.com/trusting-trust/)
+- [SLSA – Supply-chain Levels for Software Artifacts](https://slsa.dev)
