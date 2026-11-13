@@ -1,0 +1,111 @@
+---
+title: "TypeScript, Python, Go hay Rust? Chọn ngôn ngữ lập trình năm 2026"
+summary: "So sánh thực tế bốn ngôn ngữ đang chiếm phần lớn tin tuyển dụng và dự án mã nguồn mở hiện nay: mỗi ngôn ngữ mạnh ở đâu và ai nên học nó trước."
+publishedAt: "2026-10-15"
+readTime: "7 phút đọc"
+tags: ["Programming Languages", "TypeScript", "Python", "Go", "Rust", "Career"]
+featured: false
+image: "/images/blogs/which-programming-language-to-learn-in-2026/cover.png"
+author: "Linh Junior"
+---
+
+## Không có ngôn ngữ "tốt nhất"
+
+"Nên học ngôn ngữ nào?" là một trong những câu hỏi phổ biến nhất của người mới. Câu trả lời thật lòng là: **tùy vào thứ bạn muốn xây dựng.** Nhưng năm 2026, bốn ngôn ngữ đã bao phủ phần lớn nhu cầu của ngành: **TypeScript, Python, Go và Rust**. Cùng so sánh nhé.
+
+## TypeScript – ngôn ngữ của sản phẩm
+
+**Mạnh nhất ở:** frontend web, API backend, ứng dụng full-stack, mobile với React Native, serverless function.
+
+Theo báo cáo Octoverse, TypeScript trở thành ngôn ngữ được dùng nhiều nhất trên GitHub năm 2025. Với React, Next.js, NestJS và Node.js, một ngôn ngữ có thể chạy toàn bộ sản phẩm của bạn.
+
+```ts
+// A typed API handler in Next.js (App Router)
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const page = Number(searchParams.get("page") ?? 1);
+  const posts = await db.post.findMany({ skip: (page - 1) * 10, take: 10 });
+  return Response.json(posts);
+}
+```
+
+**Học trước nếu** bạn muốn làm sản phẩm web hoặc làm việc ở startup, agency.
+
+## Python – ngôn ngữ của AI và dữ liệu
+
+**Mạnh nhất ở:** machine learning, phân tích dữ liệu, script tự động, backend cho AI agent, tính toán khoa học.
+
+Hệ sinh thái của Python — PyTorch, pandas, NumPy, FastAPI và gần như mọi SDK AI — là không đối thủ. Nếu công việc của bạn đụng tới model hoặc pipeline dữ liệu, bạn sẽ gặp Python.
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
+```
+
+**Học trước nếu** bạn quan tâm tới AI/ML, data engineering hoặc tự động hóa.
+
+## Go – ngôn ngữ của hạ tầng cloud
+
+**Mạnh nhất ở:** microservice, CLI, networking, công cụ DevOps, backend xử lý đồng thời lớn.
+
+Docker, Kubernetes, Terraform và Prometheus đều viết bằng Go. Nó đơn giản, biên dịch ra một file binary duy nhất, khởi động nhanh và xử lý đồng thời tốt nhờ goroutine.
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "ok")
+	})
+	http.ListenAndServe(":8080", nil)
+}
+```
+
+**Học trước nếu** bạn thích hệ thống backend, platform engineering hoặc DevOps.
+
+## Rust – ngôn ngữ của hiệu năng và an toàn
+
+**Mạnh nhất ở:** lập trình hệ thống, service cần hiệu năng cao, WebAssembly, công cụ cho lập trình viên, nhúng.
+
+Rust cho hiệu năng ngang C/C++ nhưng an toàn bộ nhớ nhờ compiler kiểm soát. Nhiều công cụ JavaScript hiện đại (như SWC, Turbopack và Biome) được viết bằng Rust, và nó ngày càng được dùng trong hệ điều hành và trình duyệt.
+
+```rust
+fn main() {
+    let numbers = vec![1, 2, 3, 4, 5];
+    let total: i32 = numbers.iter().map(|n| n * n).sum();
+    println!("Sum of squares: {}", total);
+}
+```
+
+**Học trước nếu** bạn thích lập trình cấp thấp và sẵn sàng với đường cong học tập dốc hơn. Với đa số người mới, Rust hợp làm ngôn ngữ thứ hai hoặc thứ ba hơn.
+
+## Chọn nhanh
+
+- **Mình muốn đi làm, xây web hoặc app** → TypeScript.
+- **Mình muốn làm AI / dữ liệu** → Python.
+- **Mình muốn xây hạ tầng cloud hoặc backend quy mô lớn** → Go.
+- **Mình muốn viết phần mềm nhanh, cấp thấp** → Rust.
+- **Mình chưa biết** → TypeScript hoặc Python. Cả hai đều có thị trường việc làm lớn và dễ bắt đầu.
+
+## AI có làm việc chọn ngôn ngữ bớt quan trọng?
+
+Một phần. AI agent có thể chuyển code giữa các ngôn ngữ và viết boilerplate bằng bất kỳ ngôn ngữ nào. Nhưng để **review** code đó, bạn vẫn phải hiểu cách viết đặc trưng của ngôn ngữ, hệ thống kiểu, mô hình xử lý đồng thời và hệ sinh thái của nó. AI giúp bạn *viết* ngôn ngữ thứ hai dễ hơn; nó không thay được việc *hiểu sâu* ít nhất một ngôn ngữ.
+
+Lời khuyên của mình: chọn một ngôn ngữ hợp với mục tiêu, học đủ sâu để xây và deploy dự án thật, rồi bổ sung ngôn ngữ thứ hai bổ trợ cho nó. Một tổ hợp phổ biến và dễ xin việc năm 2026 là **TypeScript cho sản phẩm + Python cho phần AI**, hoặc **TypeScript + Go** cho các team nặng về backend.
+
+### Tài liệu tham khảo
+
+- [GitHub Blog – Octoverse 2025](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/)
+- [The Go Programming Language](https://go.dev)
+- [The Rust Programming Language](https://www.rust-lang.org)
+- [Tài liệu FastAPI](https://fastapi.tiangolo.com)

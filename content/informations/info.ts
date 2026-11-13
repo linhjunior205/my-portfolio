@@ -30,6 +30,8 @@ export const baseInfo = {
     email: "linhmedia2005@gmail.com",
     phone: "+84 766558382",
     location: "Da Nang, Vietnam",
+    // Path to the CV in /public. Set to "" to hide the Download CV button.
+    cv: "/cv/linh-junior-cv.pdf",
     socials: {
         linkedin: "https://www.linkedin.com/in/tr%E1%BA%A7n-c%E1%BA%A3nh-linh-650148308/",
         facebook: "https://www.facebook.com/trancanhlinhcuto",
@@ -61,9 +63,12 @@ export function getYearsOfExperience(from: string = baseInfo.careerStartDate): n
     return Math.max(0, years);
 }
 
+const years = getYearsOfExperience();
+const yearsLabel = `${years}+ year${years === 1 ? "" : "s"}`;
+
 export const aboutDescription: string[] = [
-    `Passionate Full-Stack Developer with ${getYearsOfExperience()}+ years of experience delivering production-ready web and mobile applications. Strong background in backend systems, distributed computing, and cloud-native development with a focus on performance, scalability, and security.`,
-    "I specialize in Nest.js and Next.js, but I'm always excited to learn new technologies and tackle challenging problems. When I'm not coding, you'll find me working on personal projects, exploring the latest tech trends, or learning from tech blogs and documentation.",
+    `Full-Stack Developer based in Da Nang with ${yearsLabel} of hands-on experience building web applications. On a 5-member outsourcing team I worked as developer, business analyst and tester — gathering requirements with clients, implementing features with Next.js, NestJS and PostgreSQL, and making sure what we shipped actually worked.`,
+    "I care about maintainable code, testing what I ship, and understanding the business problem behind every feature. Outside of client work I build side projects, explore AI tooling such as coding agents and the Model Context Protocol, and write about what I learn on my blog.",
 ];
 
 export const traits: string[] = [
@@ -106,9 +111,11 @@ export const skillGroups: SkillGroup[] = [
     },
 ];
 
+const technologyCount = skillGroups.reduce((total, group) => total + group.skills.length, 0);
+
 export const stats: Stat[] = [
-    { number: `${getYearsOfExperience()}+`, label: "Years Experience" },
-    { number: "20+", label: "Projects Completed" },
-    { number: "15+", label: "Technologies Mastered" },
-    { number: "24/7", label: "Development Passion" },
+    { number: `${years}+`, label: "Years Experience" },
+    { number: "3", label: "Roles: Dev · BA · Tester" },
+    { number: `${technologyCount}`, label: "Technologies in Toolkit" },
+    { number: "Open", label: "To New Opportunities" },
 ];

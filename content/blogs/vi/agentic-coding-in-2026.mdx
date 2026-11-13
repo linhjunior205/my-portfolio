@@ -1,0 +1,85 @@
+---
+title: "Agentic Coding năm 2026: AI agent đã thay đổi cách chúng ta làm phần mềm như thế nào"
+summary: "Trợ lý AI đã tiến từ gợi ý code thành những agent biết lên kế hoạch, sửa code, chạy test và mở pull request. Điều gì thực sự thay đổi với lập trình viên, điều gì vẫn giữ nguyên, và kỹ năng nào quan trọng lúc này."
+publishedAt: "2026-11-10"
+readTime: "8 phút đọc"
+tags: ["AI", "Agentic Coding", "Developer Productivity", "Career"]
+featured: true
+image: "/images/blogs/agentic-coding-in-2026/cover.png"
+author: "Linh Junior"
+---
+
+## Từ autocomplete đến agent
+
+Ba năm trước, "AI hỗ trợ lập trình" chủ yếu là một bộ gợi ý code thông minh hơn: bạn gõ tên hàm, model đoán tiếp vài dòng. Đến năm 2026, trải nghiệm mặc định đã khác hẳn. Bạn mô tả công việc, và một **agent** sẽ đọc codebase, lập kế hoạch, sửa nhiều file, chạy build và test, tự sửa chỗ hỏng, rồi đưa cho bạn một bản diff hoặc pull request để review.
+
+Các báo cáo trong ngành đều nói về cùng một sự dịch chuyển. Gartner xếp nền tảng phát triển "AI-native" vào nhóm xu hướng công nghệ chiến lược hàng đầu năm 2026, còn báo cáo về agentic coding của Anthropic mô tả việc kỹ sư chuyển từ tự viết từng dòng sang **điều phối** các agent viết, test và review code. Dù con số cụ thể thế nào, hướng đi đã rõ: ngày càng nhiều code mới được AI soạn thảo và con người review.
+
+## Agent thực sự làm gì
+
+Agent không phải phép màu. Bên dưới, nó là một vòng lặp:
+
+1. **Đọc ngữ cảnh** – mở file, tìm trong repo, đọc tài liệu và thông báo lỗi.
+2. **Lập kế hoạch** – chia công việc thành các bước.
+3. **Hành động qua tool** – sửa file, chạy lệnh shell, gọi API.
+4. **Quan sát** – đọc output của compiler, kết quả test hoặc HTTP response.
+5. **Lặp lại** cho tới khi đạt mục tiêu hoặc cần con người quyết định.
+
+Chất lượng kết quả phụ thuộc vào bước 1 và 4 nhiều hơn là việc model "thông minh" đến đâu. Một agent chạy được test suite và đọc được lỗi sẽ thắng một agent thông minh hơn nhưng phải đoán mò.
+
+```ts
+// Một vòng lặp agent (rất) đơn giản
+while (!done) {
+  const step = await model.decideNextStep({ goal, history, tools });
+
+  if (step.type === "tool_call") {
+    const result = await tools[step.name](step.input);
+    history.push({ call: step, result });
+  } else {
+    done = true;
+    return step.answer;
+  }
+}
+```
+
+## Công việc hằng ngày đã thay đổi ra sao
+
+- **Code boilerplate gần như miễn phí.** Endpoint CRUD, DTO, validate form, migration và khung test được soạn trong vài phút.
+- **Đọc code quan trọng hơn gõ code.** Phần lớn thời gian chuyển sang review diff, kiểm tra edge case và tự hỏi "thiết kế này đã đúng chưa?".
+- **Test trở thành vô lăng.** Bộ test tốt là thứ giúp agent tự kiểm chứng công việc của mình. Team có test yếu sẽ nhận về output yếu.
+- **Quy trình nhiều agent bắt đầu xuất hiện.** Một agent viết tính năng, một agent review, một agent kiểm tra bảo mật. Con người định hướng và quyết định cuối cùng.
+- **Chuẩn chung để truy cập tool.** Các giao thức như Model Context Protocol (MCP) cho phép một agent làm việc với GitHub, database, hệ thống quản lý issue và tool nội bộ qua cùng một giao diện.
+
+## Điều gì không thay đổi
+
+- **Yêu cầu vẫn là phần khó nhất.** Agent sẵn sàng xây sai thứ cần xây với tốc độ rất nhanh. Hiểu người dùng thực sự cần gì vẫn là việc của con người — vì vậy kỹ năng phân tích nghiệp vụ (BA) bỗng trở nên rất giá trị.
+- **Trách nhiệm vẫn thuộc về bạn.** Nếu code sinh ra làm lộ dữ liệu hay sập production, "AI viết đấy" không phải lời biện hộ. Các khảo sát liên tục cho thấy phần lớn lập trình viên dùng AI nhưng ít người tin tưởng hoàn toàn vào kết quả — và sự hoài nghi đó là lành mạnh.
+- **Kiến thức nền tảng vẫn thắng.** Hiểu HTTP, database, index, transaction và cache chính là thứ giúp bạn phát hiện khi giải pháp của agent sai một cách khó thấy.
+
+## Cách mình làm việc với agent trong dự án Next.js + NestJS
+
+Một quy trình hiệu quả với mình:
+
+1. **Viết mô tả công việc ngắn gọn** – mục tiêu, các file liên quan, ràng buộc ("không đổi public API", "dùng Prisma schema hiện có").
+2. **Giữ một file hướng dẫn dự án** trong repo (ví dụ `CLAUDE.md` hoặc `AGENTS.md`) mô tả lệnh, kiến trúc và quy ước, để mỗi phiên làm việc đều bắt đầu với đúng ngữ cảnh.
+3. **Để agent tự chạy build và test**, không chỉ viết code.
+4. **Review diff như review PR của đồng đội** – cách đặt tên, xử lý lỗi, bảo mật, hiệu năng.
+5. **Commit từng bước nhỏ** để dễ revert khi có thay đổi sai.
+
+## Kỹ năng đáng đầu tư lúc này
+
+- **Thiết kế hệ thống** – agent giỏi các thay đổi cục bộ, nhưng yếu hơn ở quyết định kiến trúc.
+- **Viết test** – unit, integration và end-to-end test là thứ khiến output của agent đáng tin.
+- **Review code** – đọc code một cách nhanh và có tư duy phản biện.
+- **Bảo mật cơ bản** – validate input, xác thực, quản lý secret và nhóm rủi ro mới của AI như prompt injection.
+- **Giao tiếp** – biến một yêu cầu mơ hồ thành một đặc tả rõ ràng giờ là kỹ năng cốt lõi của kỹ sư.
+
+## Kết luận
+
+AI agent không thay thế lập trình viên; nó thay đổi việc lập trình viên dành thời gian vào đâu. Gõ ít hơn, quyết định nhiều hơn. Những người hưởng lợi nhiều nhất là người coi agent như một đồng đội junior làm rất nhanh: đưa ngữ cảnh rõ ràng, kiểm tra kết quả, và luôn giữ trách nhiệm với sản phẩm cuối.
+
+### Tài liệu tham khảo
+
+- [Anthropic – Eight trends defining how software gets built in 2026](https://claude.com/resources/articles/eight-trends-defining-how-software-gets-built-in-2026)
+- [Gend – Software Development Trends 2026: Agentic Engineering Rises](https://www.gend.co/blog/software-development-trends-2026)
+- [Dreamix – The Top 7 Software Development Trends for 2026](https://dreamix.eu/insights/top-software-development-trends-to-know/)

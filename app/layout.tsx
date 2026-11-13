@@ -12,22 +12,27 @@ const jetBrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mon
 export const metadata: Metadata = {
   metadataBase: new URL(baseInfo.portfolioURL),
   title: `${baseInfo.shortName} - ${baseInfo.role}`,
-  description: `${baseInfo.role} & Creative Technologist based in the digital realm.`,
-  keywords: ['developer', 'full stack', 'react', 'nextjs', 'typescript'],
+  description: `${baseInfo.role} based in ${baseInfo.location}, building web apps with Next.js, NestJS and PostgreSQL. Portfolio, projects and blog.`,
+  keywords: ['full stack developer', 'next.js', 'nestjs', 'typescript', 'react', 'postgresql', 'da nang', 'vietnam'],
   authors: [{ name: baseInfo.shortName, url: baseInfo.portfolioURL }],
   creator: baseInfo.shortName,
   openGraph: {
     title: `${baseInfo.shortName} - ${baseInfo.role}`,
-    description: `${baseInfo.role} & Creative Technologist`,
+    description: `${baseInfo.role} based in ${baseInfo.location} — portfolio, projects and blog.`,
     url: baseInfo.portfolioURL,
     siteName: `${baseInfo.shortName} Portfolio`,
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${baseInfo.name} — ${baseInfo.role}` }],
   },
   twitter: {
     card: 'summary_large_image',
     title: `${baseInfo.shortName} - ${baseInfo.role}`,
-    description: `${baseInfo.role} & Creative Technologist`,
+    description: `${baseInfo.role} based in ${baseInfo.location} — portfolio, projects and blog.`,
+    images: ['/og-image.png'],
     creator: `@${baseInfo.shortName.toLowerCase()}`,
+  },
+  alternates: {
+    canonical: '/',
   },
   robots: {
     index: true,

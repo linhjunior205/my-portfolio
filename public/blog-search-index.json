@@ -14,7 +14,11 @@
     ],
     "featured": true,
     "image": "/images/blogs/agentic-coding-in-2026/cover.png",
-    "author": "Linh Junior"
+    "author": "Linh Junior",
+    "languages": [
+      "en",
+      "vi"
+    ]
   },
   {
     "slug": "typescript-became-number-one-on-github",
@@ -31,7 +35,11 @@
     ],
     "featured": true,
     "image": "/images/blogs/typescript-became-number-one-on-github/cover.png",
-    "author": "Linh Junior"
+    "author": "Linh Junior",
+    "languages": [
+      "en",
+      "vi"
+    ]
   },
   {
     "slug": "build-your-first-mcp-server-with-typescript",
@@ -49,7 +57,11 @@
     ],
     "featured": true,
     "image": "/images/blogs/build-your-first-mcp-server-with-typescript/cover.png",
-    "author": "Linh Junior"
+    "author": "Linh Junior",
+    "languages": [
+      "en",
+      "vi"
+    ]
   },
   {
     "slug": "junior-developer-vietnam-it-market-2026",
@@ -66,7 +78,11 @@
     ],
     "featured": false,
     "image": "/images/blogs/junior-developer-vietnam-it-market-2026/cover.png",
-    "author": "Linh Junior"
+    "author": "Linh Junior",
+    "languages": [
+      "en",
+      "vi"
+    ]
   },
   {
     "slug": "which-programming-language-to-learn-in-2026",
@@ -85,7 +101,11 @@
     ],
     "featured": false,
     "image": "/images/blogs/which-programming-language-to-learn-in-2026/cover.png",
-    "author": "Linh Junior"
+    "author": "Linh Junior",
+    "languages": [
+      "en",
+      "vi"
+    ]
   },
   {
     "slug": "prompt-injection-guide-for-web-developers",
@@ -102,6 +122,10 @@
     ],
     "featured": false,
     "image": "/images/blogs/prompt-injection-guide-for-web-developers/cover.png",
-    "author": "Linh Junior"
+    "author": "Linh Junior",
+    "languages": [
+      "en",
+      "vi"
+    ]
   }
 ]
