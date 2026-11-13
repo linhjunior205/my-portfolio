@@ -1,0 +1,96 @@
+---
+title: "Classic Reads: \"Things You Should Never Do\" — Joel Spolsky on Rewrites (2000)"
+summary: "Joel Spolsky called rewriting code from scratch \"the single worst strategic mistake\" a software company can make, using Netscape as the example. When is he right, and how do you modernize old code safely?"
+publishedAt: "2026-10-14"
+readTime: "6 min read"
+tags: ["Classic Reads", "Software Engineering", "Refactoring"]
+featured: false
+image: "/images/blogs/classic-things-you-should-never-do/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** is a series where I summarize influential essays in software engineering and ask what they still teach us today.
+
+## The essay
+
+In April 2000, **Joel Spolsky** published **"Things You Should Never Do, Part I"**. The thing you should never do: **rewrite the code from scratch.**
+
+His example was **Netscape**. Instead of evolving the Navigator 4 codebase, the company started over. The next major release, Netscape 6, came out years later (there was never a version 5), while Internet Explorer took the market. Joel called a from-scratch rewrite "the single worst strategic mistake that any software company can make."
+
+## Why developers want to rewrite
+
+Joel points out a basic asymmetry: **it is harder to read code than to write it.** So developers look at old code, find it messy, and conclude it would be faster and cleaner to start over.
+
+## Why rewrites go wrong
+
+### Old code contains knowledge
+
+That ugly function with strange special cases? Each one is probably a **bug fix** for a real situation: a weird browser, a specific customer's data, a network edge case. Joel's line: old code "has been used. It has been tested. Lots of bugs have been found, and they've been fixed." Throw it away and you throw away years of learning — and will rediscover those bugs one by one.
+
+### You stand still while competitors move
+
+During a rewrite, you spend months or years producing a product that, at best, does what you already had. Users get nothing new.
+
+### The new code will not be as clean as you think
+
+By the time the rewrite handles every real-world case, it will collect its own "ugly" fixes.
+
+## What to do instead
+
+Joel separates three kinds of problems in old code, each with a targeted fix:
+
+- **Architectural problems** → refactor carefully, move code piece by piece.
+- **Inefficiency** → find the slow part and optimize it; it is usually a small fraction of the code.
+- **Ugly code** → rename, reformat, clean up incrementally.
+
+None of these require starting over.
+
+## Is it *never* the right call?
+
+Real-world experience since 2000 adds nuance. Rewrites can be justified when:
+
+- The **platform is dying** (an unsupported language, framework or runtime).
+- The product's **purpose has fundamentally changed**.
+- The codebase is **small** enough that the rewrite takes weeks, not years.
+
+Even then, the safest approach is **incremental replacement**, not a big-bang rewrite.
+
+## The modern tool: the strangler fig pattern
+
+Martin Fowler named this approach after the strangler fig, a plant that grows around a tree until it replaces it:
+
+1. Put a **routing layer** (proxy, API gateway or router) in front of the old system.
+2. Build **one feature** in the new system and route just that traffic to it.
+3. Repeat, feature by feature, while the old system keeps running.
+4. Retire the old system when nothing routes to it anymore.
+
+```ts
+// Next.js middleware: send migrated routes to the new app, everything else to legacy
+import { NextResponse, type NextRequest } from "next/server";
+
+const MIGRATED = ["/orders", "/account"];
+
+export function middleware(req: NextRequest) {
+  const isMigrated = MIGRATED.some((p) => req.nextUrl.pathname.startsWith(p));
+  if (isMigrated) return NextResponse.next(); // handled by the new app
+  return NextResponse.rewrite(new URL(req.nextUrl.pathname, process.env.LEGACY_URL));
+}
+```
+
+Users keep getting value, risk stays small, and you can stop at any time.
+
+## Why it matters with AI
+
+AI agents make rewrites *feel* cheap: "just ask the agent to rewrite the module in the new framework." But Joel's main point was never about typing speed. It was about **hidden knowledge in old code**. An agent rewriting a module can silently drop the special case that keeps your biggest customer working. Before any rewrite — by human or AI — capture current behaviour in **tests**, then migrate in small, verified steps.
+
+## Takeaways
+
+- Messy old code usually encodes real-world knowledge; respect it.
+- Prefer refactoring and incremental replacement to big-bang rewrites.
+- Write characterization tests before changing legacy behaviour.
+- Use the strangler fig pattern when you truly need a new system.
+
+## Read the original
+
+- [Joel Spolsky – Things You Should Never Do, Part I](https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/)
+- [Martin Fowler – Strangler Fig Application](https://martinfowler.com/bliki/StranglerFigApplication.html)

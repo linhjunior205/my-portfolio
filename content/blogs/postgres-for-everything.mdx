@@ -1,0 +1,125 @@
+---
+title: "Just Use Postgres? How PostgreSQL Became the Default Database for Everything"
+summary: "Relational data, JSON documents, full-text search, vector embeddings and even job queues — PostgreSQL can handle all of them. Here is when one database is enough and when it is not."
+publishedAt: "2026-11-02"
+readTime: "8 min read"
+tags: ["PostgreSQL", "Database", "Backend", "AI"]
+featured: false
+image: "/images/blogs/postgres-for-everything/cover.png"
+author: "Linh Junior"
+---
+
+## The trend
+
+A few years ago, a typical startup architecture had a relational database, a document store, a search engine, a cache, a message queue and, more recently, a vector database. Six systems to run, secure, back up and keep in sync.
+
+Today many teams start with **just PostgreSQL** — and add other systems only when they have a proven need. Postgres has consistently ranked among the most used and most admired databases in developer surveys, and managed offerings such as Supabase, Neon and the big cloud providers made it easy to run.
+
+## What one Postgres can do
+
+### Relational data (of course)
+
+Transactions, foreign keys, constraints and a mature query planner. This is still its core strength.
+
+### JSON documents
+
+The `jsonb` type stores JSON in a binary format that can be indexed and queried:
+
+```sql
+CREATE TABLE events (
+  id bigserial PRIMARY KEY,
+  payload jsonb NOT NULL
+);
+
+CREATE INDEX events_payload_gin ON events USING gin (payload);
+
+SELECT payload->>'userId' AS user_id
+FROM events
+WHERE payload @> '{"type": "signup"}';
+```
+
+For many "we need MongoDB for flexibility" cases, a `jsonb` column next to normal columns is enough.
+
+### Full-text search
+
+Built-in `tsvector` and `tsquery` cover a lot of search needs before you need Elasticsearch:
+
+```sql
+ALTER TABLE posts ADD COLUMN search tsvector
+  GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || body)) STORED;
+
+CREATE INDEX posts_search_idx ON posts USING gin (search);
+
+SELECT title FROM posts
+WHERE search @@ websearch_to_tsquery('english', 'react server components');
+```
+
+### Vector search for AI features
+
+The **pgvector** extension adds a `vector` type and similarity search, which is exactly what retrieval-augmented generation (RAG) needs:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE documents (
+  id bigserial PRIMARY KEY,
+  content text,
+  embedding vector(1536)
+);
+
+-- the 5 chunks closest to a query embedding
+SELECT content FROM documents
+ORDER BY embedding <=> $1
+LIMIT 5;
+```
+
+The big advantage: your embeddings live **next to your business data**, so you can filter by user, permissions or date in the same query.
+
+### Job queues
+
+With `SELECT ... FOR UPDATE SKIP LOCKED`, several workers can safely pick jobs from a table without stepping on each other. Libraries such as pg-boss (Node.js) and others build full queues on this pattern.
+
+```sql
+SELECT id, payload FROM jobs
+WHERE status = 'pending'
+ORDER BY created_at
+LIMIT 1
+FOR UPDATE SKIP LOCKED;
+```
+
+## Why "one database" is attractive
+
+- **Fewer moving parts** – one thing to back up, monitor, secure and upgrade.
+- **Transactions across features** – save an order and enqueue its email job in the same transaction. No "the job was sent but the order failed".
+- **One skill set** – the whole team already knows SQL.
+- **Lower cost** at small and medium scale.
+
+## When to reach for something else
+
+"Just use Postgres" is a great default, not a law:
+
+- **Very high-volume analytics** over billions of rows → a columnar store like ClickHouse.
+- **Advanced search relevance** (typo tolerance, facets, ranking tuning at scale) → Elasticsearch, OpenSearch or Meilisearch.
+- **Huge vector collections** with strict latency needs → a dedicated vector database may be worth it.
+- **Massive message throughput** or event streaming → Kafka, RabbitMQ or similar.
+- **Hot caching** of very frequent reads → Redis.
+
+The key is to add these **when you have measured a real limit**, not on day one.
+
+## Practical tips
+
+- Learn `EXPLAIN ANALYZE`. Most "Postgres is slow" problems are missing indexes.
+- Use a connection pooler (PgBouncer or your provider's pooler) in serverless environments.
+- Keep migrations in version control.
+- Turn on Row Level Security if clients can reach the database directly (as with Supabase).
+
+## Conclusion
+
+PostgreSQL has quietly grown from "the relational database" into a general-purpose data platform. For most web apps, starting with one well-understood Postgres instance and adding specialized systems only when needed is the simplest, cheapest and most reliable path.
+
+### References
+
+- [PostgreSQL – JSON types](https://www.postgresql.org/docs/current/datatype-json.html)
+- [PostgreSQL – Full Text Search](https://www.postgresql.org/docs/current/textsearch.html)
+- [pgvector on GitHub](https://github.com/pgvector/pgvector)
+- [Stack Overflow Developer Survey](https://survey.stackoverflow.co/)

@@ -1,0 +1,80 @@
+---
+title: "Classic Reads: \"The Mythical Man-Month\" and Brooks's Law (1975)"
+summary: "\"Adding manpower to a late software project makes it later.\" Fred Brooks' book on managing the IBM System/360 project is half a century old and still describes the mistakes teams make every week."
+publishedAt: "2026-11-04"
+readTime: "6 min read"
+tags: ["Classic Reads", "Software Engineering", "Project Management"]
+featured: false
+image: "/images/blogs/classic-the-mythical-man-month/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** is a series where I summarize influential essays in software engineering and ask what they still teach us today.
+
+## The book
+
+**The Mythical Man-Month: Essays on Software Engineering** was published by **Fred Brooks** in **1975**, based on his experience managing IBM's OS/360 operating system. The 20th-anniversary edition (1995) added "No Silver Bullet" and a retrospective chapter. It is one of the most quoted books in our industry — and, as the joke goes, one of the least read.
+
+## The man-month is a myth
+
+Project plans often treat effort as interchangeable: if a job takes 12 person-months, then 4 people can do it in 3 months, or 12 people in 1 month.
+
+Brooks shows why this fails for software:
+
+- **Tasks cannot be perfectly divided.** Some work is sequential. Nine women cannot make a baby in one month.
+- **Communication grows faster than team size.** With *n* people there are *n(n−1)/2* possible communication paths. 5 people: 10 paths. 20 people: 190 paths.
+- **New people need training** — usually by the experienced people who were doing the work.
+
+## Brooks's Law
+
+From this comes the most famous line in the book:
+
+> "Adding manpower to a late software project makes it later."
+
+New members slow everyone down before they speed anything up. Brooks himself called the law an "outrageous oversimplification", but the core insight survives: **you cannot rescue a late project just by adding people.**
+
+## Other ideas worth knowing
+
+### Conceptual integrity
+
+The most important consideration in system design is that the system reflects **one coherent set of design ideas**, ideally from one mind or a small group. A product with fewer features but consistent design beats one with many features stitched together.
+
+### The surgical team
+
+Brooks proposed organizing teams around one chief programmer supported by specialists, like a surgeon with assistants — an early argument for small, focused teams with clear roles.
+
+### The second-system effect
+
+The second system an architect designs tends to be over-engineered, packed with every feature that was cut from the first. Watch out for "this time we'll do it properly" rewrites.
+
+### Plan to throw one away
+
+"Plan to throw one away; you will, anyhow." The first version teaches you what you should have built. (Brooks later softened this in favour of incremental development.)
+
+### No silver bullet for estimates
+
+He also observed that programmers are optimists and that schedules slip "one day at a time" — a reminder to track progress continuously.
+
+## What still holds in 2026
+
+- **Brooks's Law** explains why emergency hiring rarely saves a deadline. Cutting scope or moving the date usually works better.
+- **Communication overhead** is why companies favour small autonomous teams ("two-pizza teams") with clear interfaces between them.
+- **Conceptual integrity** is why great products often have a strong design owner — and why consistent architecture matters even more when AI agents generate code across the codebase.
+
+## What changed
+
+- Tooling, version control, CI and async communication have reduced (not removed) onboarding and coordination costs.
+- Iterative, incremental delivery has replaced big upfront plans.
+- AI agents add a new twist: they are "team members" that need context but no training time. They can help a late project — but the humans still need to coordinate, review and integrate their work.
+
+## Takeaways
+
+- When a project is late, prefer **cutting scope** over adding people.
+- Keep teams small and interfaces between teams clear.
+- Protect the design's conceptual integrity.
+- Beware the second-system effect when planning a rewrite.
+
+## Read the original
+
+- [The Mythical Man-Month (Anniversary Edition), Addison-Wesley, 1995](https://en.wikipedia.org/wiki/The_Mythical_Man-Month)
+- [Wikipedia – Brooks's law](https://en.wikipedia.org/wiki/Brooks%27s_law)

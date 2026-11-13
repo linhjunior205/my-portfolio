@@ -1,0 +1,105 @@
+---
+title: "RAG Explained for Web Developers: Let an LLM Answer From Your Own Data"
+summary: "Retrieval-augmented generation is the most common pattern behind 'chat with your docs' features. Learn how it works step by step and build a minimal version with TypeScript and Postgres."
+publishedAt: "2026-10-26"
+readTime: "9 min read"
+tags: ["AI", "LLM", "RAG", "TypeScript", "PostgreSQL"]
+featured: false
+image: "/images/blogs/rag-explained-for-web-developers/cover.png"
+author: "Linh Junior"
+---
+
+## The problem
+
+A large language model knows a lot about the world, but nothing about **your** product docs, your company policies or yesterday's support tickets. Fine-tuning a model on that data is expensive and goes stale quickly.
+
+**Retrieval-augmented generation (RAG)** takes a simpler route: at question time, **find the relevant pieces of your data and paste them into the prompt**. The model answers using that context.
+
+## The pipeline in two phases
+
+### Phase 1: Indexing (done ahead of time)
+
+1. **Load** your documents (Markdown, PDFs, database rows).
+2. **Chunk** them into small passages — a few hundred words each, ideally split at headings or paragraphs.
+3. **Embed** each chunk: an embedding model turns text into a vector of numbers that captures its meaning.
+4. **Store** the chunk text and its vector in a vector-capable database (for example Postgres with pgvector).
+
+### Phase 2: Answering (on every question)
+
+1. **Embed the question** with the same embedding model.
+2. **Retrieve** the chunks whose vectors are closest to the question vector.
+3. **Augment** the prompt: put those chunks into it as context.
+4. **Generate** the answer with the LLM, asking it to rely on the context and cite sources.
+
+## A minimal implementation
+
+Here is the core of the answering step in TypeScript. The `embed` and `generate` functions wrap whichever embedding model and LLM provider you use.
+
+```ts
+import { sql } from "./db"; // e.g. postgres.js or pg
+
+export async function answer(question: string, userId: string) {
+  // 1. Embed the question
+  const queryEmbedding = await embed(question);
+
+  // 2. Retrieve relevant chunks the user is allowed to see
+  const chunks = await sql`
+    SELECT id, title, content
+    FROM documents
+    WHERE workspace_id IN (SELECT workspace_id FROM members WHERE user_id = ${userId})
+    ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::vector
+    LIMIT 5
+  `;
+
+  // 3. Augment the prompt
+  const context = chunks
+    .map((c, i) => `[${i + 1}] ${c.title}\n${c.content}`)
+    .join("\n\n");
+
+  // 4. Generate
+  return generate({
+    system:
+      "Answer using only the context below. Cite sources like [1]. " +
+      "If the answer is not in the context, say you don't know.",
+    user: `Context:\n${context}\n\nQuestion: ${question}`,
+  });
+}
+```
+
+Notice the `WHERE` clause: **permissions are enforced at retrieval time**. If a user cannot read a document, it must never reach the prompt.
+
+## What makes RAG good or bad
+
+Most RAG quality problems are **retrieval** problems, not model problems:
+
+- **Chunking** – chunks that are too large dilute relevance; too small and they lose meaning. Split on document structure and keep the heading with each chunk.
+- **Hybrid search** – combine vector similarity with keyword search (full-text). Vectors are great at meaning but weak at exact terms like error codes or product names.
+- **Re-ranking** – retrieve 20–50 candidates, then use a re-ranking model to pick the best 5.
+- **Metadata filters** – filter by product version, language, date or permissions before similarity search.
+- **Freshness** – re-index documents when they change, or answers will quote outdated information.
+
+## Evaluate it like any other feature
+
+Build a small test set of real questions with expected answers and the documents that should be retrieved. Then measure:
+
+- **Retrieval hit rate** – did the right chunk appear in the top results?
+- **Faithfulness** – does the answer stick to the retrieved context?
+- **Answer quality** – is it correct and useful?
+
+Run this set every time you change chunk size, the embedding model or the prompt.
+
+## Security notes
+
+- Retrieved documents are **untrusted input**. A document can contain hidden instructions (prompt injection), so do not give a RAG chatbot dangerous tools.
+- Enforce access control in the retrieval query, never in the prompt.
+- Log questions and retrieved sources so you can debug wrong answers.
+
+## Conclusion
+
+RAG is "search + prompt". If you can build a good search feature, you can build a good RAG feature. Start simple — Postgres, pgvector, a clean chunking strategy and a small evaluation set — and improve retrieval before reaching for bigger models.
+
+### References
+
+- [Lewis et al. – Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (2020)](https://arxiv.org/abs/2005.11401)
+- [pgvector on GitHub](https://github.com/pgvector/pgvector)
+- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)

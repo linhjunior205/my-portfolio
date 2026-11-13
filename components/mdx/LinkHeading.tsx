@@ -3,6 +3,15 @@
 import { slugify } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { toast } from "sonner"
+import { isValidElement, type ReactNode } from "react";
+
+// Flatten heading children (which may include <em>, <code>, links...) to plain text
+function getTextContent(node: ReactNode): string {
+    if (typeof node === "string" || typeof node === "number") return String(node);
+    if (Array.isArray(node)) return node.map(getTextContent).join("");
+    if (isValidElement<{ children?: ReactNode }>(node)) return getTextContent(node.props.children);
+    return "";
+}
 
 interface LinkHeadingProps {
     children: React.ReactNode
@@ -38,7 +47,7 @@ export default function LinkHeading({ children, as }: LinkHeadingProps) {
         h6: '10',
     }
 
-    const id = slugify(children as string);
+    const id = slugify(getTextContent(children));
 
     const copyURL = (): void => {
         const url = `${window.location.origin}${window.location.pathname}#${id}`;

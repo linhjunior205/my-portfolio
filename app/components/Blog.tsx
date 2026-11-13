@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Calendar, Clock, ArrowRight, BookOpen, Tag } from 'lucide-react';
+import { Search, Calendar, Clock, ArrowRight, BookOpen, Tag, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useSearch } from '@/hooks/useSearch';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -19,6 +19,7 @@ interface BlogPost {
 }
 
 const MAX_TAGS = 10;
+const PAGE_SIZE = 6;
 
 export default function Blog() {
   const [selectedTag, setSelectedTag] = useState<string>('All');
@@ -27,7 +28,8 @@ export default function Blog() {
     results,
     allPosts,
     handleSearchChange,
-  } = useSearch({ maxResults: 20, threshold: 0.4 });
+  } = useSearch({ maxResults: 200, threshold: 0.4 });
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Build the tag list from the posts themselves, most used first
   const allTags = useMemo(() => {
@@ -46,6 +48,13 @@ export default function Blog() {
 
   const featuredPosts = filteredPosts.filter(post => post.featured);
   const regularPosts = filteredPosts.filter(post => !post.featured);
+  const visibleRegularPosts = regularPosts.slice(0, visibleCount);
+  const remainingCount = regularPosts.length - visibleRegularPosts.length;
+
+  // Start from the first page again whenever the search or tag changes
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [query, selectedTag]);
 
   return (
     <section id="blog" className="py-20 px-4 relative">
@@ -225,13 +234,13 @@ export default function Blog() {
                   Recent Articles
                 </motion.h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {regularPosts.map((post, index) => (
+                  {visibleRegularPosts.map((post, index) => (
                     <motion.article
                       key={post.slug}
                       className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-all duration-500"
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: index * 0.1 }}
+                      transition={{ duration: 0.6, delay: (index % PAGE_SIZE) * 0.1 }}
                       whileHover={{ y: -5, scale: 1.02 }}
                     >
                       <div className="relative overflow-hidden">
@@ -304,6 +313,20 @@ export default function Blog() {
                     </motion.article>
                   ))}
                 </div>
+
+                {remainingCount > 0 && (
+                  <div className="mt-10 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                      className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:border-white/40 hover:bg-white/10"
+                    >
+                      Show more articles
+                      <span className="text-sm font-normal text-gray-400">({remainingCount} more)</span>
+                      <ChevronDown size={18} className="transition-transform duration-300 group-hover:translate-y-0.5" />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

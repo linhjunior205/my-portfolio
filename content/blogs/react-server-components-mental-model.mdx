@@ -1,0 +1,121 @@
+---
+title: "React Server Components: A Practical Mental Model"
+summary: "Server Components changed how we build React apps with Next.js, and they still confuse many developers. This guide explains the server/client boundary with simple rules and real examples."
+publishedAt: "2026-11-09"
+readTime: "8 min read"
+tags: ["React", "Next.js", "TypeScript", "Web Development"]
+featured: false
+image: "/images/blogs/react-server-components-mental-model/cover.png"
+author: "Linh Junior"
+---
+
+## Why they exist
+
+For years, a typical React app shipped all of its components to the browser, then fetched data from an API, then rendered. That meant big JavaScript bundles, loading spinners and data-fetching waterfalls.
+
+**React Server Components (RSC)** flip the default: components run **on the server** unless you say otherwise. They can read the database or the file system directly, and only their rendered result is sent to the browser — not their code.
+
+This portfolio is a good example: the blog pages read MDX files from disk inside Server Components, so none of that file-reading code ever reaches your browser.
+
+## The mental model in four rules
+
+### Rule 1: Server is the default
+
+In the Next.js App Router, every component is a Server Component unless the file starts with `"use client"`. Server Components can be `async` and fetch data directly:
+
+```tsx
+// app/blog/page.tsx — a Server Component
+import { getAllPosts } from "@/lib/blog";
+
+export default async function BlogPage() {
+  const posts = await getAllPosts(); // runs on the server only
+  return (
+    <ul>
+      {posts.map((post) => (
+        <li key={post.slug}>{post.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### Rule 2: Add "use client" only where you need interactivity
+
+You need a Client Component when you use **state, effects, event handlers or browser APIs**: `useState`, `useEffect`, `onClick`, `window`, `localStorage`.
+
+```tsx
+"use client";
+import { useState } from "react";
+
+export function LikeButton() {
+  const [likes, setLikes] = useState(0);
+  return <button onClick={() => setLikes(likes + 1)}>♥ {likes}</button>;
+}
+```
+
+### Rule 3: "use client" marks a boundary, not a single file
+
+Everything imported by a Client Component also becomes client code. So put `"use client"` as **deep in the tree as possible** — on the small interactive leaf, not on the whole page.
+
+### Rule 4: Pass Server Components into Client Components as children
+
+A Client Component cannot import a Server Component, but it can **receive one as a prop**:
+
+```tsx
+// Server Component
+<Tabs>            {/* client: handles which tab is open */}
+  <PostList />     {/* server: reads the database */}
+</Tabs>
+```
+
+`Tabs` controls the interaction while `PostList` still renders on the server. This "children" pattern solves most boundary puzzles.
+
+## What can cross the boundary
+
+Props passed from a Server Component to a Client Component must be **serializable**: strings, numbers, booleans, plain objects, arrays, dates and a few more. You cannot pass functions (except Server Actions), class instances or database connections.
+
+## Common mistakes
+
+- **Putting "use client" at the top of every page.** You lose most of the benefit and ship far more JavaScript than needed.
+- **Fetching on the client "because that's how we always did it".** If the data is needed for the first render, fetch it in a Server Component.
+- **Leaking secrets.** Server Components can use secrets safely, but anything you pass as a prop to a Client Component ends up in the browser. Never pass API keys down.
+- **Importing server-only code into client files.** Use the `server-only` package in modules that must never reach the browser; the build will fail if they do.
+
+```ts
+// lib/db.ts
+import "server-only";
+export const db = createDatabaseClient(process.env.DATABASE_URL!);
+```
+
+## Mutations with Server Actions
+
+Server Actions let a form call a server function directly, without writing an API route:
+
+```tsx
+async function subscribe(formData: FormData) {
+  "use server";
+  const email = String(formData.get("email"));
+  await saveSubscriber(email); // validate and authorize here!
+}
+
+export default function Newsletter() {
+  return (
+    <form action={subscribe}>
+      <input name="email" type="email" required />
+      <button>Subscribe</button>
+    </form>
+  );
+}
+```
+
+Treat every Server Action like a public API endpoint: **validate input and check authorization inside it**, because anyone can call it.
+
+## Conclusion
+
+The easiest way to think about RSC: **server for data, client for interaction.** Start every component on the server, push `"use client"` down to the leaves that truly need it, and use the children pattern to mix both. Your bundles get smaller and your data code gets simpler.
+
+### References
+
+- [React – Server Components](https://react.dev/reference/rsc/server-components)
+- [React – 'use client' directive](https://react.dev/reference/rsc/use-client)
+- [Next.js – Server and Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components)
