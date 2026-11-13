@@ -1,0 +1,121 @@
+---
+title: "Observability 101: Logs, Metrics và Traces với OpenTelemetry"
+summary: "Khi production gặp sự cố, observability là cách bạn tìm ra nguyên nhân. Tìm hiểu ba loại tín hiệu, OpenTelemetry chuẩn hóa những gì, và cách gắn instrumentation cho một service Node.js chỉ với vài dòng."
+publishedAt: "2026-10-19"
+readTime: "8 phút đọc"
+tags: ["Observability", "DevOps", "Node.js", "Backend"]
+featured: false
+image: "/images/blogs/observability-with-opentelemetry/cover.png"
+author: "Linh Junior"
+---
+
+## Monitoring và observability
+
+**Monitoring** trả lời những câu hỏi bạn biết trước để hỏi: "CPU có vượt 80% không?", "Tỷ lệ lỗi có trên 1% không?". **Observability** là khả năng trả lời những câu hỏi bạn *không* lường trước: "Vì sao request thanh toán của người dùng mobile ở Việt Nam chỉ chậm kể từ lần deploy hôm thứ Ba?"
+
+Khi hệ thống trở nên phân tán — một frontend, vài service, queue, API bên thứ ba — một request giờ đi qua rất nhiều process. Bạn cần dữ liệu theo chân request qua tất cả chúng.
+
+## Ba loại tín hiệu
+
+### Logs
+
+Các bản ghi sự kiện có dấu thời gian. Hãy làm chúng **có cấu trúc** (JSON) thay vì văn bản tự do, để có thể lọc và tổng hợp:
+
+```json
+{"level":"error","msg":"payment failed","orderId":"o_123","provider":"stripe","durationMs":842,"traceId":"4bf92f3577b34da6"}
+```
+
+### Metrics
+
+Các con số tổng hợp theo thời gian: số request, tỷ lệ lỗi, phân vị độ trễ, độ dài hàng đợi. Rẻ để lưu trữ và rất hợp cho dashboard và cảnh báo.
+
+Bộ khởi đầu tốt cho mọi service là **RED**: **R**ate (số request mỗi giây), **E**rrors (request lỗi), **D**uration (độ trễ, đặc biệt là p95/p99).
+
+### Traces
+
+Một trace theo dấu **một request** qua các service. Nó gồm các **span** — các thao tác có đo thời gian như "HTTP GET /orders", "SELECT orders", "gọi API thanh toán". Trace cho thấy chính xác thời gian bị tiêu ở đâu và lỗi bắt đầu từ đâu.
+
+Chất keo kỳ diệu là **trace ID**: đưa nó vào mọi dòng log, và bạn có thể nhảy từ một trace chậm tới đúng các dòng log của request đó.
+
+## OpenTelemetry là gì
+
+Trước OpenTelemetry (OTel), mỗi nhà cung cấp có agent và định dạng riêng. Đổi công cụ đồng nghĩa với gắn lại instrumentation cho code.
+
+**OpenTelemetry** là một chuẩn mã nguồn mở, trung lập với nhà cung cấp, thuộc CNCF, cung cấp:
+
+- **API và SDK** cho nhiều ngôn ngữ để tạo traces, metrics và logs.
+- **Auto-instrumentation** cho các thư viện phổ biến (HTTP, Express, NestJS, driver database).
+- **OTLP**, giao thức chuẩn để xuất dữ liệu.
+- **Collector**, một service nhận, xử lý và chuyển tiếp dữ liệu telemetry tới bất kỳ backend nào.
+
+Bạn gắn instrumentation **một lần** và có thể gửi dữ liệu tới Jaeger, Grafana Tempo, Prometheus hay một công cụ thương mại — và đổi ý về sau.
+
+## Gắn instrumentation cho service Node.js
+
+Cài SDK và bộ auto-instrumentation:
+
+```bash
+npm install @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node \
+  @opentelemetry/exporter-trace-otlp-http
+```
+
+Tạo một file chạy **trước** phần còn lại của ứng dụng:
+
+```ts
+// instrumentation.ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+
+const sdk = new NodeSDK({
+  serviceName: "orders-api",
+  traceExporter: new OTLPTraceExporter({
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318/v1/traces",
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+sdk.start();
+```
+
+Chạy ứng dụng với file này được nạp đầu tiên (ví dụ `node --import ./instrumentation.js dist/main.js`). Các request HTTP và truy vấn database giờ tự sinh span. Thêm span tùy chỉnh quanh logic nghiệp vụ quan trọng:
+
+```ts
+import { trace } from "@opentelemetry/api";
+
+const tracer = trace.getTracer("orders");
+
+export async function checkout(cartId: string) {
+  return tracer.startActiveSpan("checkout", async (span) => {
+    try {
+      span.setAttribute("cart.id", cartId);
+      return await processCheckout(cartId);
+    } catch (err) {
+      span.recordException(err as Error);
+      throw err;
+    } finally {
+      span.end();
+    }
+  });
+}
+```
+
+Để thử nghiệm ở máy local, chạy Jaeger bằng Docker và mở giao diện của nó để xem trace.
+
+## Lời khuyên thực tế
+
+- **Bắt đầu với traces + metrics RED** trên những luồng người dùng quan trọng nhất.
+- **Thêm trace ID vào log** để ba loại tín hiệu kết nối với nhau.
+- **Cảnh báo theo triệu chứng người dùng cảm nhận được** (tỷ lệ lỗi, độ trễ) thay vì mỗi lần CPU tăng vọt.
+- **Coi chừng cardinality.** Đừng dùng user ID hay URL đầy đủ làm nhãn metric — chi phí lưu trữ sẽ bùng nổ. Hãy đặt chúng vào span và log.
+- **Không bao giờ log secret hay dữ liệu cá nhân** như mật khẩu, token hay số thẻ đầy đủ.
+
+## Kết luận
+
+Observability biến "có gì đó hỏng ở đâu đó" thành "lệnh gọi thanh toán trong span checkout bắt đầu timeout sau bản deploy 4f2a". OpenTelemetry giúp làm được điều đó mà không bị khóa vào một nhà cung cấp. Hãy gắn instrumentation cho một service ngay tuần này — bạn của tương lai khi trực sự cố sẽ cảm ơn bạn.
+
+### Tài liệu tham khảo
+
+- [OpenTelemetry – Documentation](https://opentelemetry.io/docs/)
+- [OpenTelemetry – Node.js getting started](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/)
+- [Jaeger – Distributed tracing platform](https://www.jaegertracing.io)

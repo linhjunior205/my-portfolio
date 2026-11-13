@@ -1,0 +1,91 @@
+---
+title: "Classic Reads: \"Reflections on Trusting Trust\" của Ken Thompson (1984)"
+summary: "Trong bài phát biểu nhận giải Turing, người đồng sáng tạo Unix chỉ ra cách một trình biên dịch có thể bí mật cài cửa hậu mà không để lại dấu vết nào trong mã nguồn. Bốn mươi năm sau, đó là nền móng của bảo mật chuỗi cung ứng phần mềm."
+publishedAt: "2026-09-30"
+readTime: "6 phút đọc"
+tags: ["Classic Reads", "Security", "Software Engineering"]
+featured: false
+image: "/images/blogs/classic-reflections-on-trusting-trust/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** là loạt bài mình tóm tắt những bài luận có ảnh hưởng lớn trong ngành kỹ thuật phần mềm và tự hỏi chúng còn dạy gì cho chúng ta hôm nay.
+
+## Bài phát biểu
+
+Năm 1983, **Ken Thompson** và **Dennis Ritchie** nhận giải Turing vì đã tạo ra Unix. Bài phát biểu nhận giải của Thompson, đăng trên *Communications of the ACM* tháng 8 năm 1984, chỉ dài ba trang. Nó có tên **"Reflections on Trusting Trust"** (Suy ngẫm về việc tin vào lòng tin), và là một trong những văn bản quan trọng nhất của ngành bảo mật máy tính.
+
+## Cuộc tấn công qua ba giai đoạn
+
+Thompson mô tả từng bước cách xây một trình biên dịch biết nói dối.
+
+### Giai đoạn 1: Một chương trình in ra chính nó
+
+Ông bắt đầu bằng một câu đố: viết một chương trình xuất ra chính mã nguồn của nó (gọi là *quine*). Ý chính là một chương trình có thể mang theo bản sao của chính mình.
+
+### Giai đoạn 2: Một trình biên dịch biết học
+
+Trình biên dịch C được viết bằng chính C. Khi bạn dạy trình biên dịch một tính năng mới rồi biên dịch lại nó bằng trình biên dịch cũ, file thực thi mới "biết" tính năng đó — và tri thức ấy không còn cần hiện diện trong mã nguồn nữa.
+
+### Giai đoạn 3: Con ngựa thành Troy
+
+Giờ tới mánh chính:
+
+1. Sửa trình biên dịch để khi biên dịch chương trình **login**, nó chèn một **cửa hậu** chấp nhận một mật khẩu bí mật.
+2. Sửa thêm để khi biên dịch **chính trình biên dịch**, nó chèn **cả hai** sửa đổi này.
+3. Biên dịch trình biên dịch một lần với các thay đổi trên. Rồi **xóa các thay đổi khỏi mã nguồn của trình biên dịch**.
+
+Từ giờ trở đi, file thực thi của trình biên dịch liên tục chèn lại cửa hậu vào mọi trình biên dịch mới và mọi chương trình login — trong khi **toàn bộ mã nguồn trông hoàn toàn sạch sẽ**. Bạn có thể đọc từng dòng mà chẳng thấy gì.
+
+## Bài học
+
+Kết luận của Thompson rất nổi tiếng:
+
+> "You can't trust code that you did not totally create yourself." (Bạn không thể tin đoạn code mà bạn không hoàn toàn tự tạo ra.)
+
+Và vì chẳng ai tự viết trình biên dịch, hệ điều hành, microcode CPU và firmware của riêng mình, **mọi hệ thống đều dựa trên lòng tin** vào công cụ và con người. Review mã nguồn là chưa đủ nếu chính các công cụ build ra nó có thể đã bị xâm nhập.
+
+## Vì sao nó càng quan trọng năm 2026
+
+Năm 1984, Thompson đã mô tả thứ mà ngày nay ta gọi là **tấn công chuỗi cung ứng phần mềm**. Những phiên bản hiện đại là có thật:
+
+- **Hệ thống build bị xâm nhập** đã được dùng để phát tán bản cập nhật độc hại tới hàng nghìn tổ chức.
+- **Package độc hại** trên các registry công khai giả mạo tên phổ biến hoặc chiếm quyền tài khoản người duy trì.
+- **Cửa hậu giấu trong script build hoặc file test** của thư viện mã nguồn mở đã được phát hiện chỉ nhờ may mắn.
+
+Thư mục `node_modules` của bạn có lẽ chứa hàng trăm package do những người bạn chưa từng gặp viết ra. Đó chính xác là bài toán lòng tin mà Thompson mô tả.
+
+## Phòng thủ hiện đại
+
+Những câu trả lời của ngành là hậu duệ trực tiếp của bài phát biểu này:
+
+- **Lock file và ghim phiên bản** – cài đúng thứ bạn đã review (`npm ci`, không phải `npm install` trong CI).
+- **Reproducible build** – cùng một mã nguồn phải luôn cho ra cùng một file nhị phân giống từng bit, để ai cũng kiểm chứng được.
+- **Diverse double-compiling** – kỹ thuật của David A. Wheeler để phát hiện trình biên dịch kiểu "trusting trust" bằng cách biên dịch nó với một trình biên dịch khác, độc lập.
+- **Artifact có chữ ký và nguồn gốc** – các dự án như Sigstore và framework như SLSA ghi lại ai đã build cái gì, từ mã nguồn nào, trên hệ thống nào.
+- **SBOM** (software bill of materials) – danh sách mọi thành phần trong phần mềm của bạn để có thể phản ứng khi một thành phần bị xâm nhập.
+- **Quyền tối thiểu trong CI** – job build không nên giữ secret production mà nó không cần.
+
+```bash
+# Simple habits for Node.js projects
+npm ci                 # install exactly what the lockfile says
+npm audit              # check for known vulnerabilities
+npm ls --all | wc -l   # see how many packages you really trust
+```
+
+## AI thêm một lớp mới
+
+Trợ lý lập trình AI và agent giờ cũng là một phần của chuỗi. Chúng gợi ý dependency, viết script build và chạy lệnh. Hãy đối xử với gợi ý của chúng như code từ một người đóng góp lạ mặt: kiểm tra package có thật sự tồn tại và đúng là cái bạn muốn, và review script trước khi chạy.
+
+## Bài học rút ra
+
+- Chỉ review mã nguồn không thể đảm bảo an toàn; công cụ và dependency cũng quan trọng.
+- Ghim, kiểm chứng và giảm thiểu dependency.
+- Ưu tiên build có thể tái tạo, có chữ ký và ghi lại nguồn gốc.
+- Coi mỗi package mới — do người hay AI gợi ý — là một quyết định về lòng tin.
+
+## Đọc bản gốc
+
+- [Ken Thompson – Reflections on Trusting Trust (ACM, 1984)](https://dl.acm.org/doi/10.1145/358198.358210)
+- [David A. Wheeler – Countering Trusting Trust through Diverse Double-Compiling](https://dwheeler.com/trusting-trust/)
+- [SLSA – Supply-chain Levels for Software Artifacts](https://slsa.dev)

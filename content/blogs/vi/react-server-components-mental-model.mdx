@@ -1,0 +1,121 @@
+---
+title: "React Server Components: Một mô hình tư duy thực tế"
+summary: "Server Components đã thay đổi cách chúng ta xây ứng dụng React với Next.js, nhưng vẫn khiến nhiều lập trình viên bối rối. Bài này giải thích ranh giới server/client bằng vài quy tắc đơn giản và ví dụ thật."
+publishedAt: "2026-11-09"
+readTime: "8 phút đọc"
+tags: ["React", "Next.js", "TypeScript", "Web Development"]
+featured: false
+image: "/images/blogs/react-server-components-mental-model/cover.png"
+author: "Linh Junior"
+---
+
+## Vì sao chúng ra đời
+
+Nhiều năm liền, một ứng dụng React điển hình gửi toàn bộ component xuống trình duyệt, rồi gọi API lấy dữ liệu, rồi mới render. Kết quả là bundle JavaScript to, vòng xoay loading khắp nơi và các chuỗi request nối đuôi nhau.
+
+**React Server Components (RSC)** đảo ngược mặc định: component chạy **trên server** trừ khi bạn nói khác. Chúng có thể đọc trực tiếp database hay file system, và chỉ kết quả đã render được gửi xuống trình duyệt — không phải code của chúng.
+
+Chính portfolio này là một ví dụ: trang blog đọc file MDX từ ổ đĩa bên trong Server Component, nên đoạn code đọc file đó không bao giờ tới trình duyệt của bạn.
+
+## Mô hình tư duy trong bốn quy tắc
+
+### Quy tắc 1: Server là mặc định
+
+Trong Next.js App Router, mọi component là Server Component trừ khi file bắt đầu bằng `"use client"`. Server Component có thể là hàm `async` và lấy dữ liệu trực tiếp:
+
+```tsx
+// app/blog/page.tsx — a Server Component
+import { getAllPosts } from "@/lib/blog";
+
+export default async function BlogPage() {
+  const posts = await getAllPosts(); // runs on the server only
+  return (
+    <ul>
+      {posts.map((post) => (
+        <li key={post.slug}>{post.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### Quy tắc 2: Chỉ thêm "use client" ở nơi cần tương tác
+
+Bạn cần Client Component khi dùng **state, effect, xử lý sự kiện hoặc API của trình duyệt**: `useState`, `useEffect`, `onClick`, `window`, `localStorage`.
+
+```tsx
+"use client";
+import { useState } from "react";
+
+export function LikeButton() {
+  const [likes, setLikes] = useState(0);
+  return <button onClick={() => setLikes(likes + 1)}>♥ {likes}</button>;
+}
+```
+
+### Quy tắc 3: "use client" đánh dấu một ranh giới, không chỉ một file
+
+Mọi thứ được Client Component import cũng trở thành code phía client. Vì vậy hãy đặt `"use client"` **càng sâu trong cây component càng tốt** — ở cái lá nhỏ cần tương tác, không phải cả trang.
+
+### Quy tắc 4: Truyền Server Component vào Client Component qua children
+
+Client Component không import được Server Component, nhưng có thể **nhận nó như một prop**:
+
+```tsx
+// Server Component
+<Tabs>            {/* client: handles which tab is open */}
+  <PostList />     {/* server: reads the database */}
+</Tabs>
+```
+
+`Tabs` lo phần tương tác, còn `PostList` vẫn render trên server. Mẫu "children" này giải quyết phần lớn các câu đố về ranh giới.
+
+## Thứ gì được phép đi qua ranh giới
+
+Props truyền từ Server Component sang Client Component phải **tuần tự hóa được**: chuỗi, số, boolean, object thường, mảng, ngày tháng và vài kiểu khác. Bạn không thể truyền hàm (trừ Server Action), instance của class hay kết nối database.
+
+## Những lỗi thường gặp
+
+- **Đặt "use client" ở đầu mọi trang.** Bạn mất gần hết lợi ích và gửi xuống nhiều JavaScript hơn mức cần.
+- **Lấy dữ liệu phía client "vì xưa nay vẫn làm thế".** Nếu dữ liệu cần cho lần render đầu, hãy lấy nó trong Server Component.
+- **Làm lộ secret.** Server Component dùng secret an toàn, nhưng mọi thứ bạn truyền xuống Client Component qua prop đều sẽ tới trình duyệt. Đừng bao giờ truyền API key xuống.
+- **Import code chỉ dành cho server vào file client.** Dùng package `server-only` trong các module không bao giờ được tới trình duyệt; build sẽ báo lỗi nếu chúng bị kéo xuống.
+
+```ts
+// lib/db.ts
+import "server-only";
+export const db = createDatabaseClient(process.env.DATABASE_URL!);
+```
+
+## Thay đổi dữ liệu với Server Actions
+
+Server Action cho phép form gọi thẳng một hàm trên server, không cần viết API route:
+
+```tsx
+async function subscribe(formData: FormData) {
+  "use server";
+  const email = String(formData.get("email"));
+  await saveSubscriber(email); // validate and authorize here!
+}
+
+export default function Newsletter() {
+  return (
+    <form action={subscribe}>
+      <input name="email" type="email" required />
+      <button>Subscribe</button>
+    </form>
+  );
+}
+```
+
+Hãy coi mỗi Server Action như một endpoint API công khai: **validate input và kiểm tra quyền ngay bên trong**, vì ai cũng có thể gọi nó.
+
+## Kết luận
+
+Cách dễ nhất để nghĩ về RSC: **server lo dữ liệu, client lo tương tác.** Bắt đầu mọi component ở server, đẩy `"use client"` xuống những chiếc lá thật sự cần, và dùng mẫu children để kết hợp cả hai. Bundle của bạn nhỏ hơn và code xử lý dữ liệu đơn giản hơn.
+
+### Tài liệu tham khảo
+
+- [React – Server Components](https://react.dev/reference/rsc/server-components)
+- [React – 'use client' directive](https://react.dev/reference/rsc/use-client)
+- [Next.js – Server and Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components)

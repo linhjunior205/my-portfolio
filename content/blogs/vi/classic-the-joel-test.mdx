@@ -1,0 +1,84 @@
+---
+title: "Classic Reads: \"The Joel Test\" — 12 bước để có code tốt hơn (2000)"
+summary: "Mười hai câu hỏi có/không của Joel Spolsky để đánh giá một team phần mềm đã trở thành công cụ tuyển dụng và tự đánh giá cho cả một thế hệ. Danh sách đầy đủ, điều gì còn đúng, và một phiên bản cập nhật cho 2026."
+publishedAt: "2026-10-21"
+readTime: "6 phút đọc"
+tags: ["Classic Reads", "Software Engineering", "Teamwork", "Career"]
+featured: false
+image: "/images/blogs/classic-the-joel-test/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** là loạt bài mình tóm tắt những bài luận có ảnh hưởng lớn trong ngành kỹ thuật phần mềm và tự hỏi chúng còn dạy gì cho chúng ta hôm nay.
+
+## Bài luận
+
+Tháng 8 năm 2000, **Joel Spolsky** — đồng sáng lập Fog Creek Software (nơi Trello ra đời) và về sau là Stack Overflow — đăng bài **"The Joel Test: 12 Steps to Better Code"** trên blog *Joel on Software*.
+
+Ý tưởng được cố tình làm đơn giản: mười hai câu hỏi **có/không** mà bạn trả lời được trong vài phút. 12 điểm là hoàn hảo; Joel viết rằng 11 điểm là chấp nhận được, còn từ 10 trở xuống nghĩa là có vấn đề nghiêm trọng.
+
+## Mười hai câu hỏi
+
+1. **Bạn có dùng source control không?**
+2. **Bạn có build được chỉ với một bước không?**
+3. **Bạn có build hằng ngày không?**
+4. **Bạn có cơ sở dữ liệu quản lý bug không?**
+5. **Bạn có sửa bug trước khi viết code mới không?**
+6. **Bạn có lịch trình được cập nhật không?**
+7. **Bạn có đặc tả (spec) không?**
+8. **Lập trình viên có điều kiện làm việc yên tĩnh không?**
+9. **Bạn có dùng những công cụ tốt nhất mà tiền có thể mua không?**
+10. **Bạn có tester không?**
+11. **Ứng viên có phải viết code trong buổi phỏng vấn không?**
+12. **Bạn có làm "hallway usability testing" (kéo người qua đường thử giao diện) không?**
+
+## Vì sao nó hiệu quả
+
+- **Nhanh và cụ thể.** Không có mô hình trưởng thành, không có tài liệu quy trình 200 trang — chỉ là những câu hỏi ai cũng trả lời được.
+- **Hữu ích cho người tìm việc.** Lập trình viên bắt đầu hỏi người phỏng vấn những câu này để đánh giá công ty trước khi đầu quân.
+- **Mỗi câu hỏi ẩn một nguyên tắc sâu hơn**: khả năng tái tạo (1–3), chất lượng trước tiên (4–5), lập kế hoạch (6–7), năng suất lập trình viên (8–9), đảm bảo chất lượng (10), tuyển đúng người (11) và tập trung vào người dùng (12).
+
+## Nó đứng vững thế nào vào năm 2026
+
+Nhiều câu hỏi đã trở nên chuẩn mực tới mức "có" là mức tối thiểu:
+
+- **Source control** – Git có mặt ở khắp nơi.
+- **Build một bước và build hằng ngày** – đã tiến hóa thành **continuous integration**: mỗi lần push đều được build và test tự động.
+- **Cơ sở dữ liệu bug** – issue tracker như GitHub Issues, Jira hay Linear ở đâu cũng có.
+
+Một số vẫn khó đến bất ngờ:
+
+- **Sửa bug trước khi viết code mới** – áp lực tính năng vẫn thường thắng.
+- **Lịch trình và spec luôn cập nhật** – đã được thay bằng roadmap, user story và design doc, nhưng giữ chúng cập nhật vẫn hiếm.
+- **Điều kiện làm việc yên tĩnh** – văn phòng mở, thông báo chat liên tục và họp nối họp khiến thời gian tập trung thành vấn đề thật.
+- **Hallway usability testing** – đưa giao diện cho vài người xem trong năm phút vẫn là một trong những cách đảm bảo chất lượng rẻ nhất và bị bỏ qua nhiều nhất.
+
+Và một số đã đổi nghĩa:
+
+- **Tester** – nhiều team không còn QA riêng; lập trình viên tự sở hữu test tự động. Nguyên tắc — phải có người nhìn chất lượng một cách hệ thống — vẫn đứng vững.
+- **Viết code khi phỏng vấn** – vẫn phổ biến, nhưng giờ gây tranh luận: bài làm ở nhà, buổi lập trình cặp và bài tập "làm việc cùng trợ lý AI" là những lựa chọn thay thế.
+
+## Phiên bản 2026 của bài test
+
+Nếu viết một bản cập nhật hiện đại, mình sẽ giữ tinh thần cũ và thêm:
+
+1. Mọi thay đổi có đi qua **code review** không?
+2. **CI có chạy test** trên mọi pull request không?
+3. Bạn có thể **deploy lên production bằng một bước**, và rollback dễ y như vậy không?
+4. Bạn có **giám sát và cảnh báo** báo cho bạn biết sự cố trước khi người dùng biết không?
+5. **Secret có được giữ ngoài code** và xoay vòng định kỳ không?
+6. Một lập trình viên mới có thể **chạy dự án ở máy local trong vòng một ngày** không?
+7. Có **tài liệu viết ra về cách hệ thống và team vận hành**, được giữ trong repo không?
+8. Lập trình viên có **thời gian tập trung không bị gián đoạn** mỗi ngày không?
+9. Bạn có quy tắc rõ ràng cho **việc dùng công cụ AI** — dữ liệu nào được chia sẻ và code sinh ra được review thế nào không?
+10. Bạn có **trò chuyện với người dùng thật** thường xuyên không?
+
+## Bài học rút ra
+
+- Dùng Joel Test (hoặc phiên bản hiện đại) để đánh giá những team bạn sắp gia nhập — và cả team bạn đang ở.
+- Checklist đơn giản, cụ thể tốt hơn những "best practice" mơ hồ.
+- Phần lớn các mục là về **vòng phản hồi**: build, test, bug, người dùng. Phản hồi nhanh vẫn là trái tim của những team phần mềm giỏi.
+
+## Đọc bản gốc
+
+- [Joel Spolsky – The Joel Test: 12 Steps to Better Code](https://www.joelonsoftware.com/2000/08/09/the-joel-test-12-steps-to-better-code/)

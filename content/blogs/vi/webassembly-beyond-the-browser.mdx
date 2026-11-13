@@ -1,0 +1,101 @@
+---
+title: "WebAssembly ngoài trình duyệt: Wasm và WASI có ý nghĩa gì với lập trình viên"
+summary: "WebAssembly khởi đầu là cách chạy code nhanh trong trình duyệt. Giờ nó còn chạy plugin, edge function và các workload được cô lập trên server. Một chuyến tham quan dễ hiểu về nơi Wasm hữu ích hôm nay."
+publishedAt: "2026-09-21"
+readTime: "7 phút đọc"
+tags: ["WebAssembly", "Rust", "Cloud", "Web Development"]
+featured: false
+image: "/images/blogs/webassembly-beyond-the-browser/cover.png"
+author: "Linh Junior"
+---
+
+## WebAssembly là gì
+
+**WebAssembly (Wasm)** là một định dạng lệnh nhị phân gọn nhẹ, được thiết kế để chạy với tốc độ gần như native trong một sandbox an toàn. Thường bạn không viết nó bằng tay: bạn biên dịch code từ các ngôn ngữ như **Rust, C/C++, Go, Zig hay C#** thành một module `.wasm`.
+
+Nó trở thành chuẩn W3C năm 2019 và chạy trên mọi trình duyệt lớn. Các đặc tính chính:
+
+- **Nhanh** – gần tốc độ native với các tác vụ tính toán nặng.
+- **Di động** – cùng một module chạy trên mọi hệ điều hành và CPU có Wasm runtime.
+- **Cô lập** – module chỉ truy cập được những gì host cho phép rõ ràng.
+- **Nhỏ và khởi động nhanh** – module nạp trong vài mili giây.
+
+## Trong trình duyệt
+
+Wasm tỏa sáng ở nơi JavaScript vất vả với tính toán nặng:
+
+- Chỉnh sửa ảnh, video và âm thanh ngay trong trình duyệt.
+- Game và engine 3D.
+- Chạy các thư viện C/C++ có sẵn trên web (codec, trình render PDF, SQLite).
+- Các công cụ thiết kế như Figma, nơi từng chia sẻ rằng engine render của họ viết bằng C++ biên dịch sang WebAssembly.
+
+Một ví dụ Rust nhỏ biên dịch bằng `wasm-pack`:
+
+```rust
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn fibonacci(n: u32) -> u64 {
+    let (mut a, mut b) = (0u64, 1u64);
+    for _ in 0..n {
+        let next = a + b;
+        a = b;
+        b = next;
+    }
+    a
+}
+```
+
+```ts
+import init, { fibonacci } from "./pkg/my_wasm.js";
+
+await init();
+console.log(fibonacci(50)); // computed inside WebAssembly
+```
+
+## Ngoài trình duyệt: WASI
+
+Bản thân Wasm không truy cập được file, mạng hay đồng hồ. **WASI (WebAssembly System Interface)** định nghĩa các API chuẩn dựa trên quyền hạn (capability) để module Wasm có thể chạy trên server và thiết bị — nhưng chỉ với những quyền host cấp.
+
+Các runtime như **Wasmtime** và **WasmEdge** chạy những module này ngoài trình duyệt. **Component Model** mới hơn cho phép các module viết bằng những ngôn ngữ khác nhau nói chuyện với nhau qua giao diện có kiểu.
+
+## Wasm phía server đang được dùng ở đâu
+
+### Plugin và extension
+
+Các sản phẩm nhúng một Wasm runtime để người dùng tải lên logic tùy chỉnh một cách an toàn. Plugin không đọc được file hay gọi mạng trừ khi bạn cho phép. Các proxy như Envoy hỗ trợ filter bằng Wasm, và nhiều database cùng công cụ dùng Wasm cho hàm do người dùng định nghĩa.
+
+### Edge và serverless function
+
+Vì module khởi động trong vài mili giây và được cô lập, nhiều nền tảng edge chạy workload Wasm gần người dùng với thời gian khởi động nguội rất thấp.
+
+### Workload di động, được cô lập
+
+"Build một lần, chạy mọi nơi" theo đúng nghĩa: cùng một module chạy trên server x86 và ARM, laptop và thiết bị IoT.
+
+## Wasm và container
+
+Wasm **không** thay thế Docker với phần lớn ứng dụng, nhưng rất hợp khi bạn cần:
+
+- Khởi động trong vài mili giây.
+- Cô lập chặt chẽ cho code không tin cậy.
+- Sản phẩm build rất nhỏ.
+
+Container vẫn tốt hơn cho ứng dụng đầy đủ cần môi trường hệ điều hành hoàn chỉnh, nhiều thư viện hệ thống hoặc service chạy lâu dài.
+
+## Có nên học không?
+
+- **Frontend developer:** biết rằng Wasm tồn tại cho những phần cần hiệu năng cao và để dùng lại thư viện native. Bạn có thể gọi module Wasm từ JavaScript mà không cần tự viết Rust.
+- **Backend developer:** để mắt tới Wasm cho hệ thống plugin và edge computing.
+- **Nếu muốn đào sâu:** học một chút Rust và `wasm-bindgen` là con đường phổ biến nhất.
+
+## Kết luận
+
+WebAssembly đã phát triển từ "code nhanh hơn trong trình duyệt" thành một runtime di động, an toàn cho plugin, edge function và workload được cô lập. Bạn không cần viết lại cả stack bằng nó — nhưng biết khi nào nó là công cụ đúng sẽ giúp bạn thành một kỹ sư linh hoạt hơn.
+
+### Tài liệu tham khảo
+
+- [WebAssembly.org](https://webassembly.org)
+- [WASI.dev](https://wasi.dev)
+- [MDN – WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly)
+- [Rust and WebAssembly book](https://rustwasm.github.io/docs/book/)

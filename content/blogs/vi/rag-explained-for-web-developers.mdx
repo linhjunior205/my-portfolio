@@ -1,0 +1,105 @@
+---
+title: "Giải thích RAG cho web developer: Để LLM trả lời từ dữ liệu của chính bạn"
+summary: "Retrieval-augmented generation là mẫu phổ biến nhất đằng sau các tính năng 'chat với tài liệu'. Tìm hiểu từng bước nó hoạt động và tự xây một phiên bản tối giản bằng TypeScript và Postgres."
+publishedAt: "2026-10-26"
+readTime: "9 phút đọc"
+tags: ["AI", "LLM", "RAG", "TypeScript", "PostgreSQL"]
+featured: false
+image: "/images/blogs/rag-explained-for-web-developers/cover.png"
+author: "Linh Junior"
+---
+
+## Vấn đề
+
+Một mô hình ngôn ngữ lớn biết rất nhiều về thế giới, nhưng không biết gì về tài liệu sản phẩm **của bạn**, chính sách công ty hay ticket hỗ trợ hôm qua. Fine-tune model trên dữ liệu đó thì tốn kém và nhanh lỗi thời.
+
+**Retrieval-augmented generation (RAG)** chọn con đường đơn giản hơn: khi có câu hỏi, **tìm những phần dữ liệu liên quan rồi dán chúng vào prompt**. Model trả lời dựa trên ngữ cảnh đó.
+
+## Pipeline gồm hai giai đoạn
+
+### Giai đoạn 1: Đánh index (làm trước)
+
+1. **Nạp** tài liệu (Markdown, PDF, các dòng trong database).
+2. **Chia nhỏ (chunk)** thành các đoạn ngắn — vài trăm từ mỗi đoạn, tốt nhất là cắt theo heading hoặc đoạn văn.
+3. **Embed** từng đoạn: một embedding model biến văn bản thành một vector số thể hiện ý nghĩa của nó.
+4. **Lưu** văn bản và vector vào database hỗ trợ vector (ví dụ Postgres với pgvector).
+
+### Giai đoạn 2: Trả lời (mỗi lần có câu hỏi)
+
+1. **Embed câu hỏi** bằng cùng embedding model.
+2. **Truy xuất** các đoạn có vector gần với vector câu hỏi nhất.
+3. **Bổ sung** vào prompt: đặt các đoạn đó làm ngữ cảnh.
+4. **Sinh** câu trả lời bằng LLM, yêu cầu nó dựa vào ngữ cảnh và trích nguồn.
+
+## Một bản cài đặt tối giản
+
+Đây là phần lõi của bước trả lời bằng TypeScript. Hàm `embed` và `generate` bọc embedding model và nhà cung cấp LLM mà bạn dùng.
+
+```ts
+import { sql } from "./db"; // e.g. postgres.js or pg
+
+export async function answer(question: string, userId: string) {
+  // 1. Embed the question
+  const queryEmbedding = await embed(question);
+
+  // 2. Retrieve relevant chunks the user is allowed to see
+  const chunks = await sql`
+    SELECT id, title, content
+    FROM documents
+    WHERE workspace_id IN (SELECT workspace_id FROM members WHERE user_id = ${userId})
+    ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::vector
+    LIMIT 5
+  `;
+
+  // 3. Augment the prompt
+  const context = chunks
+    .map((c, i) => `[${i + 1}] ${c.title}\n${c.content}`)
+    .join("\n\n");
+
+  // 4. Generate
+  return generate({
+    system:
+      "Answer using only the context below. Cite sources like [1]. " +
+      "If the answer is not in the context, say you don't know.",
+    user: `Context:\n${context}\n\nQuestion: ${question}`,
+  });
+}
+```
+
+Chú ý mệnh đề `WHERE`: **phân quyền được áp dụng ngay lúc truy xuất**. Nếu người dùng không được đọc một tài liệu, nó tuyệt đối không được lọt vào prompt.
+
+## Điều gì làm RAG tốt hay tệ
+
+Phần lớn vấn đề chất lượng của RAG là vấn đề **truy xuất**, không phải vấn đề của model:
+
+- **Cách chia đoạn** – đoạn quá dài làm loãng độ liên quan; quá ngắn thì mất ý nghĩa. Hãy cắt theo cấu trúc tài liệu và giữ heading đi kèm mỗi đoạn.
+- **Tìm kiếm lai (hybrid)** – kết hợp độ tương đồng vector với tìm kiếm từ khóa (full-text). Vector giỏi về ý nghĩa nhưng yếu với từ chính xác như mã lỗi hay tên sản phẩm.
+- **Xếp hạng lại (re-ranking)** – lấy 20–50 ứng viên, rồi dùng model re-ranking để chọn 5 đoạn tốt nhất.
+- **Lọc theo metadata** – lọc theo phiên bản sản phẩm, ngôn ngữ, ngày tháng hoặc quyền trước khi tìm theo độ tương đồng.
+- **Độ mới** – đánh index lại khi tài liệu thay đổi, nếu không câu trả lời sẽ trích thông tin cũ.
+
+## Đánh giá nó như mọi tính năng khác
+
+Xây một bộ test nhỏ gồm câu hỏi thật, câu trả lời mong đợi và tài liệu đáng lẽ phải được truy xuất. Rồi đo:
+
+- **Tỷ lệ truy xuất trúng** – đoạn đúng có xuất hiện trong top kết quả không?
+- **Độ trung thành** – câu trả lời có bám vào ngữ cảnh đã truy xuất không?
+- **Chất lượng trả lời** – có đúng và hữu ích không?
+
+Chạy bộ test này mỗi khi đổi kích thước đoạn, embedding model hoặc prompt.
+
+## Lưu ý bảo mật
+
+- Tài liệu được truy xuất là **input không tin cậy**. Một tài liệu có thể chứa câu lệnh ẩn (prompt injection), nên đừng trao tool nguy hiểm cho chatbot RAG.
+- Áp dụng phân quyền trong câu truy vấn truy xuất, không bao giờ trong prompt.
+- Ghi log câu hỏi và nguồn được truy xuất để có thể debug khi trả lời sai.
+
+## Kết luận
+
+RAG là "tìm kiếm + prompt". Nếu bạn xây được một tính năng tìm kiếm tốt, bạn xây được một tính năng RAG tốt. Hãy bắt đầu đơn giản — Postgres, pgvector, một chiến lược chia đoạn gọn gàng và một bộ đánh giá nhỏ — và cải thiện phần truy xuất trước khi tìm tới model lớn hơn.
+
+### Tài liệu tham khảo
+
+- [Lewis et al. – Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (2020)](https://arxiv.org/abs/2005.11401)
+- [pgvector on GitHub](https://github.com/pgvector/pgvector)
+- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)

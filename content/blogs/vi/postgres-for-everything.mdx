@@ -1,0 +1,125 @@
+---
+title: "Cứ dùng Postgres? PostgreSQL đã trở thành database mặc định cho mọi thứ như thế nào"
+summary: "Dữ liệu quan hệ, tài liệu JSON, tìm kiếm toàn văn, vector embedding và cả hàng đợi công việc — PostgreSQL xử lý được tất cả. Khi nào một database là đủ, và khi nào thì không."
+publishedAt: "2026-11-02"
+readTime: "8 phút đọc"
+tags: ["PostgreSQL", "Database", "Backend", "AI"]
+featured: false
+image: "/images/blogs/postgres-for-everything/cover.png"
+author: "Linh Junior"
+---
+
+## Xu hướng
+
+Vài năm trước, kiến trúc điển hình của một startup gồm database quan hệ, document store, search engine, cache, message queue và gần đây là vector database. Sáu hệ thống phải vận hành, bảo mật, sao lưu và đồng bộ với nhau.
+
+Ngày nay nhiều team bắt đầu với **chỉ PostgreSQL** — và chỉ thêm hệ thống khác khi đã chứng minh được nhu cầu. Postgres liên tục nằm trong nhóm database được dùng nhiều và được yêu thích nhất trong các khảo sát lập trình viên, và các dịch vụ managed như Supabase, Neon hay của các nhà cung cấp cloud lớn khiến việc vận hành nó trở nên dễ dàng.
+
+## Một Postgres làm được gì
+
+### Dữ liệu quan hệ (tất nhiên)
+
+Transaction, khóa ngoại, ràng buộc và một bộ tối ưu truy vấn trưởng thành. Đây vẫn là thế mạnh cốt lõi.
+
+### Tài liệu JSON
+
+Kiểu `jsonb` lưu JSON ở dạng nhị phân, đánh index và truy vấn được:
+
+```sql
+CREATE TABLE events (
+  id bigserial PRIMARY KEY,
+  payload jsonb NOT NULL
+);
+
+CREATE INDEX events_payload_gin ON events USING gin (payload);
+
+SELECT payload->>'userId' AS user_id
+FROM events
+WHERE payload @> '{"type": "signup"}';
+```
+
+Với nhiều trường hợp "cần MongoDB cho linh hoạt", một cột `jsonb` đặt cạnh các cột bình thường là đủ.
+
+### Tìm kiếm toàn văn
+
+`tsvector` và `tsquery` có sẵn đáp ứng được rất nhiều nhu cầu tìm kiếm trước khi bạn cần tới Elasticsearch:
+
+```sql
+ALTER TABLE posts ADD COLUMN search tsvector
+  GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || body)) STORED;
+
+CREATE INDEX posts_search_idx ON posts USING gin (search);
+
+SELECT title FROM posts
+WHERE search @@ websearch_to_tsquery('english', 'react server components');
+```
+
+### Tìm kiếm vector cho tính năng AI
+
+Extension **pgvector** thêm kiểu `vector` và tìm kiếm theo độ tương đồng — chính xác thứ mà RAG (retrieval-augmented generation) cần:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE documents (
+  id bigserial PRIMARY KEY,
+  content text,
+  embedding vector(1536)
+);
+
+-- the 5 chunks closest to a query embedding
+SELECT content FROM documents
+ORDER BY embedding <=> $1
+LIMIT 5;
+```
+
+Lợi thế lớn: embedding nằm **ngay cạnh dữ liệu nghiệp vụ**, nên bạn có thể lọc theo người dùng, quyền hay ngày tháng trong cùng một câu truy vấn.
+
+### Hàng đợi công việc
+
+Với `SELECT ... FOR UPDATE SKIP LOCKED`, nhiều worker có thể lấy job từ một bảng một cách an toàn mà không giẫm chân nhau. Các thư viện như pg-boss (Node.js) xây cả hệ thống queue trên mẫu này.
+
+```sql
+SELECT id, payload FROM jobs
+WHERE status = 'pending'
+ORDER BY created_at
+LIMIT 1
+FOR UPDATE SKIP LOCKED;
+```
+
+## Vì sao "một database" hấp dẫn
+
+- **Ít thành phần hơn** – chỉ một thứ để sao lưu, giám sát, bảo mật và nâng cấp.
+- **Transaction xuyên tính năng** – lưu đơn hàng và đưa job gửi email vào queue trong cùng một transaction. Không còn cảnh "email đã gửi nhưng đơn hàng lỗi".
+- **Một bộ kỹ năng** – cả team đã biết SQL.
+- **Chi phí thấp hơn** ở quy mô nhỏ và vừa.
+
+## Khi nào nên dùng thứ khác
+
+"Cứ dùng Postgres" là mặc định tốt, không phải luật:
+
+- **Phân tích dữ liệu khối lượng rất lớn** trên hàng tỷ dòng → một column store như ClickHouse.
+- **Tìm kiếm nâng cao** (chịu lỗi chính tả, facet, tinh chỉnh xếp hạng ở quy mô lớn) → Elasticsearch, OpenSearch hoặc Meilisearch.
+- **Bộ sưu tập vector khổng lồ** với yêu cầu độ trễ khắt khe → database vector chuyên dụng có thể đáng giá.
+- **Lưu lượng message cực lớn** hoặc event streaming → Kafka, RabbitMQ hoặc tương tự.
+- **Cache nóng** cho các lượt đọc rất thường xuyên → Redis.
+
+Điều quan trọng là thêm chúng **khi đã đo được giới hạn thật**, không phải ngay ngày đầu.
+
+## Mẹo thực tế
+
+- Học `EXPLAIN ANALYZE`. Phần lớn vấn đề "Postgres chậm" là do thiếu index.
+- Dùng connection pooler (PgBouncer hoặc pooler của nhà cung cấp) trong môi trường serverless.
+- Giữ migration trong version control.
+- Bật Row Level Security nếu client có thể truy cập trực tiếp database (như với Supabase).
+
+## Kết luận
+
+PostgreSQL đã lặng lẽ phát triển từ "database quan hệ" thành một nền tảng dữ liệu đa năng. Với đa số ứng dụng web, bắt đầu bằng một Postgres được hiểu rõ và chỉ thêm hệ thống chuyên dụng khi cần là con đường đơn giản, rẻ và ổn định nhất.
+
+### Tài liệu tham khảo
+
+- [PostgreSQL – JSON types](https://www.postgresql.org/docs/current/datatype-json.html)
+- [PostgreSQL – Full Text Search](https://www.postgresql.org/docs/current/textsearch.html)
+- [pgvector on GitHub](https://github.com/pgvector/pgvector)
+- [Stack Overflow Developer Survey](https://survey.stackoverflow.co/)
