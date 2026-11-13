@@ -38,6 +38,10 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  verification: {
+    // Google Search Console ownership check (public value, safe to commit)
+    google: '82sKDiJkZ7eiLMdF7mxNivW5d15E_g71dxxsOEBYB0E',
+  },
 };
 
 export default function RootLayout({
