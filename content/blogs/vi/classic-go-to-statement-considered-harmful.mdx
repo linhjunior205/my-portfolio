@@ -1,0 +1,87 @@
+---
+title: "Classic Reads: \"Go To Statement Considered Harmful\" của Edsger Dijkstra (1968)"
+summary: "Một lá thư dài một trang đã góp phần khai sinh lập trình có cấu trúc và tặng cho ngành mẫu tiêu đề được yêu thích nhất. Vì sao lập luận của Dijkstra về luồng điều khiển dễ đọc vẫn định hình code chúng ta viết."
+publishedAt: "2026-10-28"
+readTime: "5 phút đọc"
+tags: ["Classic Reads", "Software Engineering", "Clean Code"]
+featured: false
+image: "/images/blogs/classic-go-to-statement-considered-harmful/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** là loạt bài mình tóm tắt những bài luận có ảnh hưởng lớn trong ngành kỹ thuật phần mềm và tự hỏi chúng còn dạy gì cho chúng ta hôm nay.
+
+## Lá thư
+
+Tháng 3 năm 1968, **Edsger W. Dijkstra** đăng một lá thư ngắn trên *Communications of the ACM*. Tiêu đề gốc của ông là "A Case Against the GO TO Statement"; biên tập viên **Niklaus Wirth** (về sau là cha đẻ của ngôn ngữ Pascal) đã đặt cho nó tiêu đề sắc hơn: **"Go To Statement Considered Harmful"** (Lệnh Go To bị coi là có hại).
+
+Lá thư dài chưa tới một trang — vậy mà đã thay đổi cách các ngôn ngữ lập trình và lập trình viên nghĩ về luồng điều khiển.
+
+## Lập luận
+
+Điểm Dijkstra nhắm tới là **khả năng hiểu của con người**, không phải hiệu năng.
+
+- Chương trình là văn bản tĩnh, nhưng điều quan trọng là **hành vi động** của nó khi chạy.
+- Để suy luận về chương trình, ta cần nối một vị trí trong văn bản với trạng thái của tiến trình đang chạy: "khi thực thi đang ở *đây*, ta biết điều gì là đúng?"
+- Với **tuần tự, điều kiện (if/else), vòng lặp và lời gọi thủ tục**, bạn có thể mô tả tiến trình của chương trình bằng một bộ tọa độ nhỏ: vị trí trong văn bản, cộng với biến đếm vòng lặp và call stack.
+- Một lệnh **goto** không giới hạn cho phép luồng điều khiển nhảy tới bất cứ đâu. Khi đó, biết mình đang ở đâu trong văn bản gần như không cho bạn biết làm sao mình tới được đó, và suy luận về tính đúng đắn trở nên cực kỳ khó.
+
+Kết luận của ông: lệnh goto "quá thô sơ; nó là một lời mời quá dễ dãi để làm rối tung chương trình của mình."
+
+## Tác động
+
+Lá thư trở thành điểm tập hợp cho **lập trình có cấu trúc**: xây chương trình chỉ từ tuần tự, rẽ nhánh và lặp, cộng với chương trình con. Trong những thập kỷ sau đó:
+
+- Các ngôn ngữ như Pascal, C rồi Java, Python, JavaScript biến các cấu trúc này thành cách viết code bình thường.
+- Nhiều ngôn ngữ hiện đại (Java, Python, JavaScript) hoàn toàn không có `goto` tổng quát.
+- "X Considered Harmful" trở thành mẫu tiêu đề bị sao chép nhiều nhất trong ngành máy tính — kể cả, tất nhiên, một bài luận tên là "'Considered Harmful' Essays Considered Harmful".
+
+## Goto có luôn xấu không?
+
+Không hẳn. Các lựa chọn thay thế có cấu trúc để thoát khỏi code lồng nhau xuất hiện sau đó: `break`, `continue`, `return` sớm, và exception. Trong C, `goto` vẫn được dùng một cách có kỷ luật cho các đường dọn dẹp tài nguyên (nhân Linux làm vậy). Bài báo năm 1974 của Donald Knuth, "Structured Programming with go to Statements", đưa ra góc nhìn tinh tế hơn.
+
+Bài học bền vững không phải là "đừng bao giờ viết chữ goto". Nó là: **luồng điều khiển phải khiến chương trình dễ suy luận.**
+
+## Vì sao nó quan trọng năm 2026
+
+Cùng nguyên tắc đó xuất hiện khắp nơi trong code hiện đại:
+
+- **Callback hell → async/await.** Callback lồng nhau sâu khiến luồng điều khiển khó theo dõi; `async/await` khôi phục cấu trúc đọc từ trên xuống dưới.
+- **Return sớm và guard clause** giữ cho hàm phẳng và dễ đọc.
+- **Exception và lỗi tường minh.** Exception là những cú nhảy có cấu trúc; lạm dụng chúng cho luồng bình thường khiến code khó suy luận, nên nhiều team ưa chuộng kiểu kết quả tường minh cho các lỗi có thể đoán trước.
+- **State machine và reducer** làm các luồng phức tạp trở nên tường minh thay vì rải những cú nhảy khắp các event handler.
+
+```ts
+// Hard to follow: nested branches
+async function handle(req: Request) {
+  if (req.user) {
+    if (req.user.isActive) {
+      if (hasPermission(req.user)) {
+        return process(req);
+      }
+    }
+  }
+  throw new Error("Forbidden");
+}
+
+// Easier to reason about: guard clauses
+async function handleClean(req: Request) {
+  if (!req.user) throw new Error("Unauthenticated");
+  if (!req.user.isActive) throw new Error("Inactive user");
+  if (!hasPermission(req.user)) throw new Error("Forbidden");
+  return process(req);
+}
+```
+
+Và khi AI sinh code, luồng điều khiển dễ đọc càng quan trọng: bạn phải **review** những gì agent viết, và luồng rối rắm che giấu bug.
+
+## Bài học rút ra
+
+- Viết code sao cho người đọc dễ dàng biết "điều gì đúng tại dòng này".
+- Ưu tiên luồng điều khiển phẳng, có cấu trúc: guard clause, hàm nhỏ, vòng lặp rõ ràng.
+- Dùng các cú nhảy (break, return, exception) có chủ đích, không phải như đường tắt.
+
+## Đọc bản gốc
+
+- [Dijkstra – Go To Statement Considered Harmful (EWD215, University of Texas archive)](https://www.cs.utexas.edu/~EWD/transcriptions/EWD02xx/EWD215.html)
+- [Wikipedia – Considered harmful](https://en.wikipedia.org/wiki/Considered_harmful)

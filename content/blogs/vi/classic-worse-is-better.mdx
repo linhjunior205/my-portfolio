@@ -1,0 +1,85 @@
+---
+title: "Classic Reads: \"Worse Is Better\" của Richard P. Gabriel (1989)"
+summary: "Vì sao Unix và C lan ra khắp thế giới trong khi những hệ thống thanh lịch hơn chỉ quanh quẩn một góc nhỏ? Câu trả lời của Gabriel — sự đơn giản trong cài đặt sẽ thắng — vẫn giải thích được công nghệ nào thành công hôm nay."
+publishedAt: "2026-10-07"
+readTime: "6 phút đọc"
+tags: ["Classic Reads", "Software Engineering", "Architecture"]
+featured: false
+image: "/images/blogs/classic-worse-is-better/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** là loạt bài mình tóm tắt những bài luận có ảnh hưởng lớn trong ngành kỹ thuật phần mềm và tự hỏi chúng còn dạy gì cho chúng ta hôm nay.
+
+## Bài luận
+
+**Richard P. Gabriel**, một chuyên gia Lisp và người sáng lập công ty Lucid, viết một bài luận vào khoảng năm 1989 tên là **"Lisp: Good News, Bad News, How to Win Big"**. Một phần trong đó, tên là **"The Rise of Worse is Better"**, đã thoát ra khỏi bài luận và trở thành một trong những ý tưởng gây tranh cãi nhất về thiết kế phần mềm.
+
+Gabriel đang cố giải thích một điều đau lòng với những người hâm mộ Lisp: vì sao **Unix và C** — thứ ông cho là kém hơn về kỹ thuật — lại lan ra khắp nơi, trong khi những hệ thống Lisp thanh lịch hơn chỉ ở trong một thị trường ngách?
+
+## Hai triết lý thiết kế
+
+Gabriel so sánh hai trường phái, đánh giá trên cùng bốn tiêu chí: **đơn giản, đúng đắn, nhất quán và đầy đủ.**
+
+### "The Right Thing" (cách tiếp cận MIT/Stanford)
+
+- **Đúng đắn** và **nhất quán** là không thể thương lượng.
+- **Đầy đủ** rất quan trọng — phải bao quát mọi trường hợp hợp lý.
+- **Giao diện đơn giản** quan trọng hơn cài đặt đơn giản. Người cài đặt chịu khổ để người dùng khỏi khổ.
+
+### "Worse is Better" (cách tiếp cận New Jersey — Unix và C, từ Bell Labs)
+
+- **Cài đặt đơn giản** được đặt lên hàng đầu, thậm chí trên cả giao diện đơn giản.
+- Đúng đắn và nhất quán quan trọng, nhưng có thể hy sinh chút ít vì sự đơn giản.
+- Có thể hy sinh sự đầy đủ bất cứ khi nào nó làm phần cài đặt phức tạp lên.
+
+## Ví dụ nổi tiếng
+
+Gabriel mô tả vấn đề "PC loser-ing": chuyện gì nên xảy ra khi một lời gọi hệ thống bị ngắt giữa chừng? Thiết kế "Right Thing" xử lý trọn vẹn bên trong hệ điều hành để chương trình không bao giờ nhận ra. Thiết kế của Unix đơn giản trả về một mã lỗi và để chương trình tự thử lại — dễ cài đặt hơn, người dùng phải làm thêm chút việc.
+
+## Vì sao "tệ hơn" lại thắng
+
+Lập luận của Gabriel mang tính tiến hóa:
+
+- Một bản cài đặt đơn giản thì **dễ port** sang máy mới. C và Unix chạy được gần như ở mọi nơi rất nhanh.
+- Nó **đủ tốt** với phần lớn người dùng, nên nó lan rộng.
+- Khi đã lan rộng, người ta **cải thiện nó từng chút** cho tới khi gần với "điều đúng đắn" — nhưng giờ thì đã có một lượng người dùng khổng lồ.
+- Trong khi đó, hệ thống hoàn hảo vẫn đang được hoàn thiện.
+
+Đó là lý do ông có câu nổi tiếng mô tả Unix và C là "the ultimate computer viruses" (những con virus máy tính tối thượng): phần mềm theo kiểu worse-is-better lan ra trước và tốt lên sau.
+
+## Cú xoay chuyển
+
+Chính Gabriel đã nghiêng qua nghiêng lại suốt nhiều năm, thậm chí viết bài phản bác chính mình dưới một bút danh. Ông chưa bao giờ quyết định dứt khoát worse-is-better là quy luật nên đón nhận hay một bi kịch cần chống lại. Sự giằng co đó là một phần lý do bài luận đáng đọc.
+
+## Nhìn thấy nó năm 2026
+
+Khi đã biết mẫu này, bạn sẽ thấy nó ở khắp nơi:
+
+- **JavaScript** – được thiết kế vội vàng, đầy những điểm kỳ quặc, nhưng chạy ở mọi nơi và đã được cải thiện suốt nhiều thập kỷ.
+- **HTTP và JSON** – những định dạng đơn giản, lỏng lẻo đã đánh bại các lựa chọn chặt chẽ hơn (như SOAP và XML schema) vì dễ cài đặt bằng bất kỳ ngôn ngữ nào.
+- **Markdown** – một cú pháp nhỏ, chưa hoàn hảo, thắng vì ai cũng viết được parser.
+- **MVP và startup** – ra bản đơn giản giải quyết vấn đề cốt lõi, rồi lặp lại.
+
+Nó cũng giải thích thất bại: những dự án chờ một thiết kế hoàn hảo, đầy đủ thường ra mắt quá muộn.
+
+## Khi "tệ hơn" thật sự là tệ hơn
+
+Worse is better không phải giấy phép cho sự cẩu thả. Một số lĩnh vực đòi hỏi "the Right Thing":
+
+- **Bảo mật** – xác thực "đủ tốt" là chưa đủ tốt.
+- **Toàn vẹn dữ liệu** – mất hay hỏng dữ liệu là không bao giờ chấp nhận được.
+- **API và giao thức công khai** – sai lầm sẽ trở thành vĩnh viễn khi nhiều client đã phụ thuộc vào chúng.
+
+Kỹ năng là biết **phần nào của hệ thống có thể đơn giản và chưa hoàn hảo, và phần nào bắt buộc phải đúng.**
+
+## Bài học rút ra
+
+- Những bản cài đặt đơn giản, ra mắt được thường thắng những bản thanh lịch nhưng chưa xong.
+- Việc được chấp nhận và lặp lại có thể quan trọng hơn sự hoàn hảo ban đầu.
+- Chọn có chủ đích nơi chấp nhận "tệ hơn" — không bao giờ ở bảo mật hay toàn vẹn dữ liệu.
+
+## Đọc bản gốc
+
+- [Richard P. Gabriel – The Rise of "Worse is Better"](https://www.dreamsongs.com/RiseOfWorseIsBetter.html)
+- [Richard P. Gabriel – Worse Is Better (background and follow-ups)](https://www.dreamsongs.com/WorseIsBetter.html)

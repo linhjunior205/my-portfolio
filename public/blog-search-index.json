@@ -16,7 +16,8 @@
     "image": "/images/blogs/platform-engineering-internal-developer-platforms/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -35,7 +36,8 @@
     "image": "/images/blogs/classic-no-silver-bullet/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -76,7 +78,8 @@
     "image": "/images/blogs/react-server-components-mental-model/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -116,7 +119,8 @@
     "image": "/images/blogs/classic-the-mythical-man-month/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -136,7 +140,8 @@
     "image": "/images/blogs/postgres-for-everything/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -177,7 +182,8 @@
     "image": "/images/blogs/classic-go-to-statement-considered-harmful/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -198,7 +204,8 @@
     "image": "/images/blogs/rag-explained-for-web-developers/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -239,7 +246,8 @@
     "image": "/images/blogs/classic-the-joel-test/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -259,7 +267,8 @@
     "image": "/images/blogs/observability-with-opentelemetry/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -301,7 +310,8 @@
     "image": "/images/blogs/classic-things-you-should-never-do/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -320,7 +330,8 @@
     "image": "/images/blogs/passkeys-the-end-of-passwords/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -360,7 +371,8 @@
     "image": "/images/blogs/classic-worse-is-better/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -380,7 +392,8 @@
     "image": "/images/blogs/modular-monolith-vs-microservices/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -399,7 +412,8 @@
     "image": "/images/blogs/classic-reflections-on-trusting-trust/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -419,7 +433,8 @@
     "image": "/images/blogs/how-to-do-great-code-reviews/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -439,7 +454,8 @@
     "image": "/images/blogs/classic-the-twelve-factor-app/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -459,7 +475,8 @@
     "image": "/images/blogs/webassembly-beyond-the-browser/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -479,7 +496,8 @@
     "image": "/images/blogs/classic-choose-boring-technology/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -499,7 +517,8 @@
     "image": "/images/blogs/testing-llm-features-with-evals/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   },
   {
@@ -518,7 +537,8 @@
     "image": "/images/blogs/classic-teach-yourself-programming-in-ten-years/cover.png",
     "author": "Linh Junior",
     "languages": [
-      "en"
+      "en",
+      "vi"
     ]
   }
 ]

@@ -1,0 +1,89 @@
+---
+title: "Platform Engineering: Vì sao team nào cũng đang xây Internal Developer Platform"
+summary: "DevOps hứa hẹn 'bạn xây thì bạn vận hành'. Platform engineering ra đời khi gánh nặng đó trở nên quá lớn với từng team. Internal developer platform là gì và bắt đầu từ quy mô nhỏ ra sao."
+publishedAt: "2026-11-12"
+readTime: "7 phút đọc"
+tags: ["Platform Engineering", "DevOps", "Cloud", "Developer Experience"]
+featured: false
+image: "/images/blogs/platform-engineering-internal-developer-platforms/cover.png"
+author: "Linh Junior"
+---
+
+## Vấn đề mà platform engineering giải quyết
+
+DevOps phá bỏ bức tường giữa lập trình viên và vận hành. Team viết service thì cũng deploy, giám sát và sửa nó lúc 2 giờ sáng. Tinh thần làm chủ đó rất tốt — cho tới khi mọi team sản phẩm đều phải thành chuyên gia về Kubernetes manifest, Terraform module, xoay vòng secret, chứng chỉ TLS, cache CI và năm công cụ observability.
+
+Kết quả là **quá tải nhận thức**. Lập trình viên mất một phần lớn thời gian mỗi tuần để vật lộn với hạ tầng thay vì làm tính năng, và mỗi team lại giải cùng một bài toán theo một cách hơi khác nhau.
+
+**Platform engineering** là lời đáp: một team chuyên trách xây dựng **internal developer platform (IDP)** — biến những vấn đề lặp đi lặp lại thành các "con đường trải nhựa" tự phục vụ.
+
+## Internal developer platform thực chất là gì
+
+IDP không phải một công cụ duy nhất. Nó là một sản phẩm, phục vụ khách hàng nội bộ (chính các lập trình viên), thường gồm:
+
+- **Golden path** – các template có định hướng cho việc phổ biến: "service NestJS mới", "app Next.js mới", "cron job mới". Một lệnh hoặc một form là có repo với CI, Dockerfile, health check, logging và deploy đã nối sẵn.
+- **Hạ tầng tự phục vụ** – xin database, queue hay môi trường preview mà không cần mở ticket.
+- **Developer portal** – một nơi duy nhất để xem các service, người phụ trách, tài liệu, đặc tả API và lịch trực. Backstage, portal mã nguồn mở xuất phát từ Spotify, là điểm khởi đầu phổ biến nhất.
+- **Rào chắn có sẵn** – quét bảo mật, giới hạn chi phí và chính sách được áp dụng tự động, để cách an toàn cũng là cách dễ nhất.
+
+## Golden path, không phải lồng vàng
+
+Nguyên tắc thiết kế quan trọng nhất: **biến việc đúng thành việc dễ, nhưng đừng cấm mọi thứ khác.** Golden path là con đường được khuyến nghị với cấu hình mặc định tốt. Team có nhu cầu đặc biệt vẫn có thể đi đường khác — chỉ là họ tự gánh phần bảo trì thêm.
+
+Những platform ép mọi team vào một quy trình cứng nhắc thường thất bại. Lập trình viên sẽ tìm cách đi vòng, và team platform trở thành nút thắt thay vì bộ tăng tốc.
+
+## Đối xử với platform như một sản phẩm
+
+Các team platform thành công hành xử như team sản phẩm:
+
+1. **Nói chuyện với người dùng.** Ngồi cạnh lập trình viên, đọc ticket hỗ trợ, tìm ra những bước chậm nhất từ "ý tưởng" tới "chạy trên production".
+2. **Bắt đầu từ nỗi đau lớn nhất.** Thường là cài đặt môi trường, CI chậm hoặc quy trình deploy — chứ không phải một portal hoành tráng.
+3. **Đo kết quả.** Thời gian từ commit tới production, tần suất deploy, thời gian onboard kỹ sư mới, và khảo sát mức độ hài lòng của lập trình viên.
+4. **Quảng bá và viết tài liệu.** Một platform tuyệt vời mà không ai biết tới thì giá trị bằng không.
+
+## Bắt đầu nhỏ (kể cả team 5 người)
+
+Bạn không cần một team platform 20 người. Team nhỏ vẫn áp dụng được ý tưởng này:
+
+- **Một repository template** có sẵn lint, test, Dockerfile và CI.
+- **Một con đường deploy duy nhất** – ví dụ mọi service deploy cùng một cách, tới cùng một nơi.
+- **Một `Makefile` hoặc npm script** giấu các lệnh dài sau `make dev`, `make test`, `make deploy`.
+- **Một tài liệu ngắn "cách team mình xây service"** mà thành viên mới thật sự đọc.
+
+```yaml
+# .github/workflows/service.yml — one reusable workflow every repo calls
+name: service
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: "22"
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint && npm test && npm run build
+```
+
+Một reusable workflow như thế này là một golden path nhỏ: cải thiện một lần, mọi repository đều hưởng lợi.
+
+## AI nằm ở đâu trong bức tranh này
+
+Coding agent khiến golden path càng giá trị hơn. Khi mọi service theo cùng một cấu trúc, được mô tả trong file hướng dẫn dự án, agent có thể dựng khung, test và deploy tính năng mới đáng tin cậy hơn nhiều. Các team platform ngày càng mở các thao tác tự phục vụ qua những giao diện chuẩn như MCP, để cùng một con đường phục vụ cả người lẫn agent.
+
+## Kết luận
+
+Platform engineering không phải là xây một portal bóng bẩy. Nó là **giảm tải nhận thức** cho lập trình viên để họ tập trung vào sản phẩm. Hãy bắt đầu từ một quy trình gây đau đầu, "trải nhựa" nó, đo mức cải thiện, rồi mở rộng dần.
+
+### Tài liệu tham khảo
+
+- [CNCF – Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)
+- [Backstage – An open platform for building developer portals](https://backstage.io)
+- [Team Topologies – Platform teams](https://teamtopologies.com/key-concepts)

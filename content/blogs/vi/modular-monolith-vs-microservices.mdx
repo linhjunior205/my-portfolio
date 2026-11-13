@@ -1,0 +1,109 @@
+---
+title: "Modular Monolith hay Microservices: Chọn kiến trúc năm 2026"
+summary: "Sau một thập kỷ cơn sốt microservices, nhiều team đang quay lại với những monolith có cấu trúc tốt. Cách để quyết định, và cách xây một monolith có thể tách ra sau này nếu thật sự cần."
+publishedAt: "2026-10-05"
+readTime: "8 phút đọc"
+tags: ["Architecture", "Backend", "NestJS", "System Design"]
+featured: false
+image: "/images/blogs/modular-monolith-vs-microservices/cover.png"
+author: "Linh Junior"
+---
+
+## Con lắc quay ngược
+
+Trong những năm 2010, microservices trở thành câu trả lời mặc định cho câu hỏi "nên xây cái này thế nào?". Netflix và Amazon dùng nó, nên ai cũng muốn. Rồi nhiều team nhận ra hóa đơn phải trả: hàng chục repository, gọi qua mạng ở khắp nơi, transaction phân tán, deploy phức tạp và debug xuyên mười service chỉ vì một con bug.
+
+Ngày nay cuộc thảo luận trong ngành cân bằng hơn. Vài công ty nổi tiếng đã viết công khai về việc gộp các service lại thành những khối deploy lớn hơn, và **modular monolith** đã trở thành điểm giữa được ưa chuộng.
+
+## Định nghĩa
+
+- **Monolith** – một ứng dụng deploy duy nhất. Không tự động là xấu; phiên bản xấu là "big ball of mud" (cục bùn khổng lồ).
+- **Modular monolith** – một ứng dụng deploy duy nhất, bên trong chia thành **các module có ranh giới rõ ràng**. Mỗi module sở hữu dữ liệu của mình và chỉ mở ra một giao diện công khai nhỏ.
+- **Microservices** – nhiều service deploy độc lập, mỗi service sở hữu dữ liệu riêng, giao tiếp qua mạng.
+
+## Microservices thật sự mang lại gì
+
+Microservices giải bài toán **mở rộng tổ chức** nhiều hơn là mở rộng kỹ thuật:
+
+- **Deploy độc lập** – team A ra bản mới mà không cần phối hợp với team B.
+- **Scale độc lập** – service xử lý ảnh có thể scale riêng với API.
+- **Tự do công nghệ** – một service viết bằng Go, một service khác bằng Python.
+- **Cô lập lỗi** – nếu làm tốt, một service hỏng không kéo sập mọi thứ.
+
+## Cái giá phải trả
+
+- **Gọi qua mạng thay vì gọi hàm** – độ trễ, thử lại, timeout, lỗi một phần.
+- **Nhất quán dữ liệu** – không có transaction database đơn giản xuyên các service; bạn cần các mẫu như saga và outbox.
+- **Gánh nặng vận hành** – CI/CD, giám sát, tracing và trực sự cố cho từng service.
+- **Phát triển và test ở máy local khó hơn.**
+
+Nếu bạn có 5 lập trình viên, thường bạn trả toàn bộ chi phí này mà nhận về rất ít lợi ích.
+
+## Hướng dẫn quyết định đơn giản
+
+Chọn **modular monolith** khi:
+
+- Team nhỏ hoặc vừa (một hoặc vài team).
+- Nghiệp vụ còn đang thay đổi và ranh giới chưa rõ.
+- Bạn muốn đi nhanh với deploy đơn giản.
+
+Cân nhắc **tách ra một service** khi:
+
+- Một module có nhu cầu scale hoặc độ tin cậy rất khác biệt.
+- Một team riêng cần sở hữu và deploy nó độc lập.
+- Nó cần runtime hoặc ngôn ngữ khác.
+- Bạn đã đo được một vấn đề thật mà monolith không giải quyết được.
+
+## Xây modular monolith tốt với NestJS
+
+Module của NestJS khớp tự nhiên với phong cách này. Các quy tắc quan trọng hơn framework:
+
+1. **Mỗi module cho một năng lực nghiệp vụ** – `orders`, `billing`, `catalog`, `users`.
+2. **Các module chỉ nói chuyện qua service công khai**, không bao giờ thò tay vào repository hay bảng của nhau.
+3. **Mỗi module sở hữu bảng của mình.** Module khác không join trực tiếp vào đó.
+4. **Dùng event cho các tác dụng phụ** xuyên module (ví dụ "đơn hàng đã đặt" kích hoạt gửi email ở module notifications).
+
+```ts
+// orders/orders.module.ts
+@Module({
+  imports: [CatalogModule],           // depends only on catalog's public API
+  providers: [OrdersService, OrdersRepository],
+  exports: [OrdersService],           // the only thing other modules may use
+})
+export class OrdersModule {}
+```
+
+```ts
+// orders/orders.service.ts
+@Injectable()
+export class OrdersService {
+  constructor(
+    private readonly repo: OrdersRepository,
+    private readonly catalog: CatalogService,
+    private readonly events: EventEmitter2,
+  ) {}
+
+  async place(userId: string, items: OrderItemInput[]) {
+    const priced = await this.catalog.priceItems(items);
+    const order = await this.repo.create(userId, priced);
+    this.events.emit("order.placed", { orderId: order.id, userId });
+    return order;
+  }
+}
+```
+
+Nếu một ngày `notifications` cần trở thành service riêng, event chỉ việc thành một message trên queue — và phần code còn lại gần như không đổi.
+
+## Giữ vững ranh giới
+
+Ranh giới sẽ bị bào mòn nếu không có gì kiểm tra. Các luật lint (ví dụ giới hạn import của ESLint hoặc dependency-cruiser) có thể làm build thất bại khi một module import phần nội bộ của module khác. Chỉ một rào chắn này đã giữ cho modular monolith không biến lại thành cục bùn.
+
+## Kết luận
+
+Kiến trúc nên đi theo quy mô team và ràng buộc thật, không theo trào lưu. Với phần lớn sản phẩm, một **modular monolith có cấu trúc tốt** là cách nhanh nhất để ra sản phẩm, và vẫn giữ được lựa chọn tách service về sau. Bắt đầu đơn giản, giữ ranh giới sạch sẽ, và chỉ tách khi bạn gọi tên được vấn đề mà việc tách sẽ giải quyết.
+
+### Tài liệu tham khảo
+
+- [Martin Fowler – MonolithFirst](https://martinfowler.com/bliki/MonolithFirst.html)
+- [Martin Fowler – Microservice Premium](https://martinfowler.com/bliki/MicroservicePremium.html)
+- [NestJS – Modules](https://docs.nestjs.com/modules)

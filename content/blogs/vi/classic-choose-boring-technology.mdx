@@ -1,0 +1,77 @@
+---
+title: "Classic Reads: \"Choose Boring Technology\" của Dan McKinley (2015)"
+summary: "Mỗi team chỉ có vài 'token đổi mới'. Bài luận của Dan McKinley về lý do những công cụ nhàm chán, đã được kiểm chứng thường là lựa chọn đúng chính là liều thuốc giải tốt nhất cho việc phát triển theo trào lưu."
+publishedAt: "2026-09-16"
+readTime: "6 phút đọc"
+tags: ["Classic Reads", "Architecture", "Career", "Software Engineering"]
+featured: false
+image: "/images/blogs/classic-choose-boring-technology/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** là loạt bài mình tóm tắt những bài luận có ảnh hưởng lớn trong ngành kỹ thuật phần mềm và tự hỏi chúng còn dạy gì cho chúng ta hôm nay.
+
+## Bài luận
+
+**Dan McKinley**, một kỹ sư từng làm nhiều năm ở Etsy, đăng bài **"Choose Boring Technology"** (Hãy chọn công nghệ nhàm chán) năm **2015**, dựa trên một bài nói chuyện của ông. Bài viết ngắn, hài hước và đã cứu nhiều team khỏi những sai lầm đắt giá.
+
+## Token đổi mới
+
+Ý tưởng trung tâm: mỗi công ty có **khoảng ba token đổi mới** (innovation token). Bạn có thể tiêu chúng vào bất cứ thứ gì mới và chưa được kiểm chứng — nhưng tiêu hết là hết.
+
+Nếu bản thân sản phẩm của bạn đã mang tính đổi mới (một loại ứng dụng mới, một thị trường mới), có lẽ bạn đã tiêu một token rồi. Dùng thêm một database hoàn toàn mới, một ngôn ngữ hoàn toàn mới **và** một nền tảng deploy hoàn toàn mới nghĩa là bạn đang đặt cược cả công ty vào nhiều ẩn số cùng lúc.
+
+## "Nhàm chán" nghĩa là gì
+
+Nhàm chán không có nghĩa là tệ. Nhàm chán nghĩa là **được hiểu rõ**:
+
+- **Các kiểu hỏng hóc của nó đã được biết.** Khi PostgreSQL hay MySQL gặp sự cố, hàng nghìn người đã gặp đúng vấn đề đó và viết về nó.
+- Nó **có tài liệu**, với câu trả lời đã nằm sẵn trên Stack Overflow.
+- **Nhiều người biết nó**, nên tuyển dụng và onboard dễ hơn.
+- Nó đã **chạy trên production nhiều năm** dưới tải thật.
+
+Công nghệ mới có những **ẩn số chưa biết** — những vấn đề chưa ai phát hiện ra. Bạn sẽ phát hiện chúng, trên production, vào thời điểm tồi tệ nhất.
+
+## Cái giá của quá nhiều công nghệ
+
+Điểm thứ hai của McKinley là về tổng số công cụ. Mỗi công nghệ bạn thêm vào đều mang chi phí liên tục: giám sát, nâng cấp, vá bảo mật, chuyên môn, tài liệu. Từng cái thì rẻ; cộng lại thì tạo ra một bề mặt vận hành khổng lồ.
+
+Ông minh họa: thêm một công cụ mới cho một vấn đề trông có vẻ tối ưu ở cục bộ, nhưng **toàn hệ thống** sẽ tốt hơn nếu giải phần lớn vấn đề bằng vài công cụ bạn đã vận hành thành thạo — dù từng cái chưa chắc là lựa chọn tốt nhất về lý thuyết.
+
+## Thêm công nghệ mới một cách có trách nhiệm
+
+Bài luận không cấm cái mới. Nó yêu cầu một quy trình:
+
+1. **Viết ra vấn đề** bạn đang cố giải quyết.
+2. **Thử giải nó bằng những gì đã có.** Tự hỏi: "với stack hiện tại thì làm việc này thế nào?"
+3. Nếu thật sự quá đau đớn, **thảo luận công khai** với team — công nghệ mới ảnh hưởng tới mọi người phải vận hành nó.
+4. Nếu chọn dùng, **cam kết với nó**: thay thế cách cũ thay vì chạy song song cả hai mãi mãi.
+
+## Công nghệ nhàm chán năm 2026
+
+Bài luận ánh xạ trực tiếp vào những lựa chọn hôm nay:
+
+- **"Cứ dùng Postgres"** cho dữ liệu quan hệ, JSON, tìm kiếm và cả queue chính là lập luận công nghệ nhàm chán trong thực tế.
+- **Modular monolith** trước microservices.
+- **Framework trưởng thành** (Next.js, NestJS, Django, Rails, Spring) thay vì framework mới của tháng này cho hệ thống production.
+- **Dịch vụ managed** thay vì tự vận hành cluster.
+
+Và công cụ AI thêm một góc nhìn mới: coding agent **giỏi hơn hẳn với công nghệ nhàm chán**, vì có nhiều dữ liệu huấn luyện và tài liệu hơn cho những công cụ phổ biến, ổn định. Agent sẽ viết PostgreSQL tốt hơn code cho một database vừa ra mắt tháng trước.
+
+## Nên tiêu token ở đâu
+
+Hãy tiêu token đổi mới ở nơi tạo ra lợi thế thật **cho người dùng** — thường là ở sản phẩm cốt lõi, không phải ở hạ tầng. Nếu giá trị sản phẩm của bạn là phản hồi luyện đọc bằng AI, hãy tiêu token vào AI, và giữ database, xác thực và deploy thật nhàm chán.
+
+Với việc học cá nhân thì quy tắc khác: dự án cá nhân là nơi hoàn hảo để chơi với những công cụ mới thú vị.
+
+## Bài học rút ra
+
+- Bạn chỉ có vài token đổi mới; hãy tiêu chúng vào điều làm sản phẩm của bạn đặc biệt.
+- Ưu tiên công nghệ có các kiểu hỏng hóc đã được biết rõ.
+- Giảm thiểu tổng số công nghệ bạn phải vận hành.
+- Thử nghiệm thoải mái trong dự án cá nhân, không phải trong lõi hệ thống production.
+
+## Đọc bản gốc
+
+- [Dan McKinley – Choose Boring Technology](https://mcfunley.com/choose-boring-technology)
+- [Choose Boring Technology – talk slides and follow-ups](https://boringtechnology.club)

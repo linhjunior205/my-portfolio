@@ -1,0 +1,111 @@
+---
+title: "Classic Reads: \"The Twelve-Factor App\" (2011)"
+summary: "Được viết bởi đồng sáng lập Heroku Adam Wiggins, Twelve-Factor App định nghĩa cách xây web service deploy gọn gàng lên cloud. Phần lớn nội dung đã trở nên chuẩn mực tới mức ta quên rằng nó từng được viết ra."
+publishedAt: "2026-09-23"
+readTime: "7 phút đọc"
+tags: ["Classic Reads", "Cloud", "DevOps", "Backend"]
+featured: false
+image: "/images/blogs/classic-the-twelve-factor-app/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** là loạt bài mình tóm tắt những bài luận có ảnh hưởng lớn trong ngành kỹ thuật phần mềm và tự hỏi chúng còn dạy gì cho chúng ta hôm nay.
+
+## Tài liệu
+
+**The Twelve-Factor App** được công bố vào khoảng năm **2011** bởi **Adam Wiggins**, đồng sáng lập Heroku, dựa trên những gì đội Heroku quan sát được qua hàng trăm nghìn ứng dụng deploy trên nền tảng của họ. Đó là một website ngắn gồm mười hai nguyên tắc để xây ứng dụng **software-as-a-service** dễ di chuyển, dễ scale và dễ deploy.
+
+Khi đó Docker chưa ra đời. Kubernetes chưa ra đời. Vậy mà tài liệu đọc như đang mô tả cách chúng ta deploy container ngày nay.
+
+## Mười hai yếu tố (nhìn từ năm 2026)
+
+### 1. Codebase
+
+Một codebase được quản lý trong version control, nhiều lần deploy (dev, staging, production). *Hôm nay:* một Git repo (hoặc một package rõ ràng trong monorepo) cho mỗi ứng dụng deploy được.
+
+### 2. Dependencies
+
+Khai báo và cô lập dependency một cách tường minh. Đừng bao giờ dựa vào thứ "đã cài sẵn trên server". *Hôm nay:* `package.json` + lockfile, `requirements.txt`, và container image.
+
+### 3. Config
+
+Lưu cấu hình — mọi thứ thay đổi giữa các lần deploy, như URL database và API key — trong **biến môi trường**, không phải trong code.
+
+```ts
+// config.ts — fail fast if required config is missing
+import { z } from "zod";
+
+export const config = z
+  .object({
+    DATABASE_URL: z.string().url(),
+    PORT: z.coerce.number().default(3000),
+    NODE_ENV: z.enum(["development", "test", "production"]),
+  })
+  .parse(process.env);
+```
+
+### 4. Backing services
+
+Coi database, cache, queue và nhà cung cấp email là **tài nguyên gắn kèm** có thể thay thế chỉ bằng cách đổi một URL.
+
+### 5. Build, release, run
+
+Tách bạch các giai đoạn: **build** ra một artifact, kết hợp với config để tạo **release**, rồi **run** nó. *Hôm nay:* CI build image một lần; cùng một image được đưa từ staging lên production.
+
+### 6. Processes
+
+Chạy ứng dụng dưới dạng một hoặc nhiều process **không trạng thái**. Mọi thứ cần lưu lại đều đi vào backing service — không bao giờ vào ổ đĩa local hay session trong bộ nhớ.
+
+### 7. Port binding
+
+Ứng dụng tự chứa và mở HTTP bằng cách **gắn vào một port**, thay vì được nhúng vào một web server bên ngoài.
+
+### 8. Concurrency
+
+Scale **ra** bằng cách chạy thêm process (process web, process worker), không chỉ làm một process to hơn.
+
+### 9. Disposability
+
+Process khởi động nhanh và **tắt êm** để có thể bật hoặc tắt bất cứ lúc nào.
+
+```ts
+process.on("SIGTERM", async () => {
+  await server.close();    // stop accepting new requests
+  await db.end();          // close connections cleanly
+  process.exit(0);
+});
+```
+
+### 10. Dev/prod parity
+
+Giữ môi trường development, staging và production giống nhau nhất có thể: cùng backing service, cùng phiên bản, thời gian ngắn giữa lúc viết code và lúc deploy. *Hôm nay:* Docker Compose ở máy local, môi trường preview cho mỗi pull request.
+
+### 11. Logs
+
+Coi log là **luồng sự kiện**: ghi ra stdout, để nền tảng thu thập và định tuyến. Đừng quản lý file log bên trong ứng dụng.
+
+### 12. Admin processes
+
+Chạy các tác vụ một lần (migration, sửa dữ liệu) như process trong **cùng môi trường và release** với ứng dụng.
+
+## Điều gì đã cũ
+
+- **Config:** biến môi trường vẫn là chuẩn, nhưng với secret thật thì phần lớn team giờ dùng secret manager để nạp chúng lúc chạy.
+- **Logs:** log có cấu trúc cộng với traces và metrics (observability) đã vượt xa "chỉ cần stdout".
+- **Không trạng thái** khó hơn với ứng dụng thời gian thực dùng WebSocket, vốn cần sticky session hoặc một lớp pub/sub dùng chung.
+- **Serverless và edge** tự động áp đặt nhiều yếu tố trong số này.
+
+## Vì sao vẫn đáng đọc
+
+Twelve-Factor App là checklist hoàn hảo cho một junior developer deploy service thật đầu tiên. Nếu ứng dụng của bạn tuân theo mười hai quy tắc này, nó sẽ chạy vui vẻ trên Vercel, Railway, Fly.io, Kubernetes hay bất kỳ cloud nào — và chuyển qua lại giữa chúng sẽ rất dễ.
+
+## Bài học rút ra
+
+- Config nằm trong môi trường, secret không bao giờ nằm trong repo.
+- Process không trạng thái, dữ liệu bền vững nằm trong backing service.
+- Build một lần, đưa cùng một artifact qua các môi trường.
+- Log ra stdout, tắt êm, giữ dev và prod giống nhau.
+
+## Đọc bản gốc
+
+- [The Twelve-Factor App](https://12factor.net)

@@ -1,0 +1,110 @@
+---
+title: "Review code thế nào cho tốt (dù bạn là người review hay người viết)"
+summary: "Code review là nơi team chia sẻ kiến thức, bắt bug và giữ chất lượng — hoặc là nơi lãng phí nhiều ngày và làm tổn thương nhau. Những thói quen thực tế cho cả hai phía của một pull request."
+publishedAt: "2026-09-28"
+readTime: "7 phút đọc"
+tags: ["Code Review", "Teamwork", "Career", "Best Practices"]
+featured: false
+image: "/images/blogs/how-to-do-great-code-reviews/cover.png"
+author: "Linh Junior"
+---
+
+## Vì sao code review quan trọng hơn trong thời đại AI
+
+Khi AI agent sinh ra ngày càng nhiều code, **review** đã trở thành một trong những kỹ năng kỹ thuật quan trọng nhất. Review là lúc con người kiểm tra rằng code đúng, an toàn, dễ hiểu và thật sự giải quyết đúng vấn đề.
+
+Bộ hướng dẫn kỹ thuật công khai của Google tóm tắt mục tiêu rất hay: hãy duyệt một thay đổi khi nó **chắc chắn cải thiện sức khỏe tổng thể của codebase**, dù chưa hoàn hảo.
+
+## Với người viết: làm PR dễ review
+
+### Giữ PR nhỏ
+
+Pull request nhỏ được review nhanh và kỹ hơn. Thay đổi 100 dòng nhận được sự chú ý thật; thay đổi 2.000 dòng nhận được "LGTM". Chia việc thành từng bước: refactor trước, rồi tính năng, rồi dọn dẹp.
+
+### Viết mô tả tử tế
+
+Trả lời ba câu hỏi:
+
+- **Cái gì** đã thay đổi?
+- **Vì sao** — giải quyết vấn đề hay ticket nào?
+- **Đã test thế nào?**
+
+Thêm ảnh chụp màn hình với thay đổi giao diện. Chỉ ra chỗ nào rủi ro hoặc chỗ bạn còn chưa chắc.
+
+### Tự review diff của mình trước
+
+Đọc PR trong giao diện review trước khi nhờ người khác. Bạn sẽ tự bắt được log debug, code bị comment và lỗi chính tả.
+
+### Phản hồi, đừng phòng thủ
+
+Comment là về code, không phải về bạn. Trả lời mọi comment, bằng một thay đổi hoặc một lời giải thích ngắn. Nếu một cuộc thảo luận qua lại hơn hai lần, hãy gọi điện nói chuyện và ghi kết quả vào PR.
+
+## Với người review: nên nhìn vào đâu
+
+Ưu tiên theo thứ tự:
+
+1. **Thiết kế** – Cái này có nên nằm ở đây không? Cách tiếp cận có đúng không?
+2. **Tính đúng đắn** – Trường hợp biên, xử lý lỗi, xử lý đồng thời, lỗi lệch một.
+3. **Bảo mật** – Validate input, kiểm tra quyền, secret, nguy cơ injection.
+4. **Test** – Có bao phủ hành vi không? Test có fail nếu code hỏng không?
+5. **Dễ đọc** – Cách đặt tên, cấu trúc, comment ở chỗ ý định không hiển nhiên.
+6. **Style** – Để linter và formatter lo càng nhiều càng tốt.
+
+### Kéo branch về chạy với thay đổi không đơn giản
+
+Chạy code thường lộ ra những gì đọc diff không thấy được.
+
+## Cách viết comment review
+
+### Cụ thể và giải thích lý do
+
+Tệ: "Sai rồi."
+Tốt: "Câu query này chạy trong vòng lặp, nên mỗi phần tử tốn một lần gọi DB. Mình có thể load tất cả bằng một câu `WHERE id IN (...)` trước vòng lặp không?"
+
+### Ghi rõ mức độ của mỗi comment
+
+Tiền tố giúp bỏ đoán mò:
+
+- **blocking:** phải sửa trước khi merge.
+- **suggestion:** một lựa chọn tốt hơn, người viết quyết định.
+- **nit:** điểm style nhỏ, không bắt buộc.
+- **question:** mình muốn hiểu, không nhất thiết phải đổi.
+
+### Đặt câu hỏi thay vì ra lệnh
+
+"Nếu `items` rỗng thì ở đây chuyện gì xảy ra?" mời người viết suy nghĩ và thường lộ ra rằng chính bạn đã hiểu nhầm điều gì đó.
+
+### Khen những điểm tốt
+
+"Hay đấy, helper này làm controller rõ ràng hơn hẳn" chẳng tốn gì mà khiến review có cảm giác hợp tác.
+
+## Tốc độ quan trọng
+
+Một PR chờ review hai ngày sẽ chặn người viết và gây conflict khi merge. Nhiều team đặt mục tiêu phản hồi lần đầu trong vòng **một ngày làm việc**. Nếu chưa review kỹ được, hãy nói rõ và hẹn thời gian.
+
+## Review code do AI sinh ra
+
+Hãy đặc biệt cẩn thận với code do agent viết:
+
+- Nó thường **trông** đúng và được format đẹp, dễ khiến bạn mất cảnh giác.
+- Kiểm tra xem nó có dùng các helper sẵn có của dự án thay vì tự viết lại không.
+- Để ý API bịa ra, thiếu xử lý lỗi và thay đổi quá rộng.
+- Đảm bảo test thật sự kiểm tra hành vi, chứ không chỉ sao chép lại phần cài đặt.
+
+## Checklist gọn nhẹ
+
+- PR nhỏ, tập trung, có mô tả rõ ràng.
+- Logic xử lý trường hợp biên và lỗi.
+- Có kiểm tra quyền và validate input.
+- Test bao phủ hành vi mới.
+- Không có secret, log debug hay code chết.
+- Tên và cấu trúc dễ theo dõi.
+
+## Kết luận
+
+Review code tốt là một kỹ năng, không phải một cửa ải. Người viết làm mọi thứ dễ dàng bằng những PR nhỏ, mô tả rõ. Người review tập trung vào điều quan trọng, giải thích lý do và phản hồi nhanh. Làm tốt cả hai, team bạn sẽ ra sản phẩm nhanh hơn *và* học hỏi lẫn nhau mỗi ngày.
+
+### Tài liệu tham khảo
+
+- [Google Engineering Practices – Code Review](https://google.github.io/eng-practices/review/)
+- [Conventional Comments](https://conventionalcomments.org)

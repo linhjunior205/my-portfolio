@@ -1,0 +1,80 @@
+---
+title: "Classic Reads: \"The Mythical Man-Month\" và định luật Brooks (1975)"
+summary: "\"Thêm người vào một dự án phần mềm đang trễ chỉ làm nó trễ hơn.\" Cuốn sách của Fred Brooks về quản lý dự án IBM System/360 đã nửa thế kỷ tuổi mà vẫn mô tả đúng những sai lầm các team mắc phải mỗi tuần."
+publishedAt: "2026-11-04"
+readTime: "6 phút đọc"
+tags: ["Classic Reads", "Software Engineering", "Project Management"]
+featured: false
+image: "/images/blogs/classic-the-mythical-man-month/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** là loạt bài mình tóm tắt những bài luận có ảnh hưởng lớn trong ngành kỹ thuật phần mềm và tự hỏi chúng còn dạy gì cho chúng ta hôm nay.
+
+## Cuốn sách
+
+**The Mythical Man-Month: Essays on Software Engineering** được **Fred Brooks** xuất bản năm **1975**, dựa trên kinh nghiệm quản lý hệ điều hành OS/360 của IBM. Ấn bản kỷ niệm 20 năm (1995) bổ sung "No Silver Bullet" và một chương nhìn lại. Đây là một trong những cuốn sách được trích dẫn nhiều nhất trong ngành — và, như người ta vẫn đùa, cũng là một trong những cuốn ít được đọc nhất.
+
+## "Tháng-người" là một huyền thoại
+
+Kế hoạch dự án thường coi công sức có thể hoán đổi: nếu một việc tốn 12 tháng-người, thì 4 người làm trong 3 tháng, hoặc 12 người làm trong 1 tháng.
+
+Brooks chỉ ra vì sao điều này sai với phần mềm:
+
+- **Công việc không thể chia nhỏ hoàn hảo.** Có những việc phải làm tuần tự. Chín người phụ nữ không thể sinh một đứa trẻ trong một tháng.
+- **Giao tiếp tăng nhanh hơn quy mô team.** Với *n* người có *n(n−1)/2* kênh giao tiếp. 5 người: 10 kênh. 20 người: 190 kênh.
+- **Người mới cần được đào tạo** — thường bởi chính những người giàu kinh nghiệm đang làm việc.
+
+## Định luật Brooks
+
+Từ đó ra đời câu nổi tiếng nhất cuốn sách:
+
+> "Adding manpower to a late software project makes it later." (Thêm nhân lực vào một dự án phần mềm đang trễ chỉ làm nó trễ hơn.)
+
+Thành viên mới làm mọi người chậm lại trước khi giúp tăng tốc được gì. Chính Brooks gọi định luật này là "một sự đơn giản hóa thái quá", nhưng cốt lõi vẫn đứng vững: **bạn không thể cứu một dự án trễ chỉ bằng cách thêm người.**
+
+## Những ý tưởng khác đáng biết
+
+### Tính toàn vẹn khái niệm
+
+Điều quan trọng nhất trong thiết kế hệ thống là hệ thống phản ánh **một bộ ý tưởng thiết kế nhất quán**, lý tưởng là từ một bộ óc hoặc một nhóm nhỏ. Một sản phẩm ít tính năng hơn nhưng thiết kế nhất quán sẽ hơn một sản phẩm nhiều tính năng được chắp vá.
+
+### Đội phẫu thuật
+
+Brooks đề xuất tổ chức team quanh một lập trình viên chính, được các chuyên gia hỗ trợ, như bác sĩ phẫu thuật cùng các trợ lý — một lập luận sớm cho những team nhỏ, tập trung, vai trò rõ ràng.
+
+### Hiệu ứng hệ thống thứ hai
+
+Hệ thống thứ hai mà một kiến trúc sư thiết kế thường bị làm quá tay, nhồi nhét mọi tính năng đã bị cắt khỏi hệ thống đầu tiên. Hãy cảnh giác với những bản viết lại kiểu "lần này mình sẽ làm cho đàng hoàng".
+
+### Lên kế hoạch để vứt đi một bản
+
+"Hãy lên kế hoạch vứt đi một bản; đằng nào bạn cũng sẽ vứt." Phiên bản đầu dạy bạn lẽ ra phải xây cái gì. (Về sau Brooks đã giảm nhẹ quan điểm này để ủng hộ phát triển tăng dần.)
+
+### Không có phép màu cho việc ước lượng
+
+Ông cũng nhận xét rằng lập trình viên là những người lạc quan và tiến độ thì trượt "từng ngày một" — lời nhắc phải theo dõi tiến độ liên tục.
+
+## Điều gì vẫn còn đúng năm 2026
+
+- **Định luật Brooks** giải thích vì sao tuyển người gấp hiếm khi cứu được deadline. Cắt bớt phạm vi hoặc lùi ngày thường hiệu quả hơn.
+- **Chi phí giao tiếp** là lý do các công ty ưa chuộng những team nhỏ tự chủ ("team hai cái pizza") với giao diện rõ ràng giữa các team.
+- **Tính toàn vẹn khái niệm** là lý do những sản phẩm tuyệt vời thường có một người làm chủ thiết kế mạnh — và vì sao kiến trúc nhất quán càng quan trọng khi AI agent sinh code khắp codebase.
+
+## Điều gì đã thay đổi
+
+- Công cụ, version control, CI và giao tiếp bất đồng bộ đã giảm (chứ không xóa bỏ) chi phí onboard và phối hợp.
+- Giao hàng lặp và tăng dần đã thay thế những kế hoạch lớn làm từ đầu.
+- AI agent thêm một khía cạnh mới: chúng là những "thành viên" cần ngữ cảnh nhưng không cần thời gian đào tạo. Chúng có thể giúp một dự án đang trễ — nhưng con người vẫn phải phối hợp, review và tích hợp công việc của chúng.
+
+## Bài học rút ra
+
+- Khi dự án trễ, ưu tiên **cắt phạm vi** hơn là thêm người.
+- Giữ team nhỏ và giao diện giữa các team rõ ràng.
+- Bảo vệ tính toàn vẹn khái niệm của thiết kế.
+- Cẩn thận với hiệu ứng hệ thống thứ hai khi lên kế hoạch viết lại.
+
+## Đọc bản gốc
+
+- [The Mythical Man-Month (Anniversary Edition), Addison-Wesley, 1995](https://en.wikipedia.org/wiki/The_Mythical_Man-Month)
+- [Wikipedia – Brooks's law](https://en.wikipedia.org/wiki/Brooks%27s_law)

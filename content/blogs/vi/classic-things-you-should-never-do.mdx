@@ -1,0 +1,96 @@
+---
+title: "Classic Reads: \"Things You Should Never Do\" — Joel Spolsky về việc viết lại từ đầu (2000)"
+summary: "Joel Spolsky gọi việc viết lại code từ đầu là \"sai lầm chiến lược tệ nhất\" một công ty phần mềm có thể mắc, lấy Netscape làm ví dụ. Khi nào ông đúng, và làm sao hiện đại hóa code cũ một cách an toàn?"
+publishedAt: "2026-10-14"
+readTime: "6 phút đọc"
+tags: ["Classic Reads", "Software Engineering", "Refactoring"]
+featured: false
+image: "/images/blogs/classic-things-you-should-never-do/cover.png"
+author: "Linh Junior"
+---
+
+> **Classic Reads** là loạt bài mình tóm tắt những bài luận có ảnh hưởng lớn trong ngành kỹ thuật phần mềm và tự hỏi chúng còn dạy gì cho chúng ta hôm nay.
+
+## Bài luận
+
+Tháng 4 năm 2000, **Joel Spolsky** đăng bài **"Things You Should Never Do, Part I"**. Điều bạn không bao giờ nên làm: **viết lại code từ đầu.**
+
+Ví dụ của ông là **Netscape**. Thay vì phát triển tiếp codebase Navigator 4, công ty đã làm lại từ đầu. Bản lớn tiếp theo, Netscape 6, ra đời nhiều năm sau (chưa từng có phiên bản 5), trong khi Internet Explorer chiếm lĩnh thị trường. Joel gọi việc viết lại từ đầu là "sai lầm chiến lược tệ nhất mà một công ty phần mềm có thể mắc phải."
+
+## Vì sao lập trình viên muốn viết lại
+
+Joel chỉ ra một sự bất cân xứng cơ bản: **đọc code khó hơn viết code.** Vì vậy lập trình viên nhìn code cũ, thấy nó lộn xộn, và kết luận rằng làm lại từ đầu sẽ nhanh và sạch hơn.
+
+## Vì sao viết lại thường thất bại
+
+### Code cũ chứa tri thức
+
+Cái hàm xấu xí với những trường hợp đặc biệt kỳ quặc ấy? Mỗi trường hợp có lẽ là một **bản sửa bug** cho một tình huống có thật: một trình duyệt lạ, dữ liệu của một khách hàng cụ thể, một trường hợp biên về mạng. Như Joel viết: code cũ "đã được dùng. Đã được test. Rất nhiều bug đã được tìm ra và sửa." Vứt nó đi là vứt đi nhiều năm học hỏi — và bạn sẽ phát hiện lại từng con bug một.
+
+### Bạn đứng yên trong khi đối thủ tiến lên
+
+Trong lúc viết lại, bạn mất nhiều tháng hoặc nhiều năm để làm ra một sản phẩm, tốt nhất cũng chỉ làm được những gì bạn đã có. Người dùng không nhận được gì mới.
+
+### Code mới sẽ không sạch như bạn nghĩ
+
+Tới lúc bản viết lại xử lý hết mọi trường hợp ngoài đời thật, nó cũng sẽ tích tụ những bản sửa "xấu xí" của riêng nó.
+
+## Thay vào đó nên làm gì
+
+Joel tách ba loại vấn đề trong code cũ, mỗi loại có cách xử lý riêng:
+
+- **Vấn đề kiến trúc** → refactor cẩn thận, di chuyển code từng phần.
+- **Kém hiệu quả** → tìm ra phần chậm và tối ưu nó; thường chỉ là một phần nhỏ của code.
+- **Code xấu** → đổi tên, định dạng lại, dọn dẹp từng chút.
+
+Không cái nào đòi hỏi phải làm lại từ đầu.
+
+## Có phải *không bao giờ* là lựa chọn đúng?
+
+Kinh nghiệm thực tế từ năm 2000 tới nay bổ sung thêm sắc thái. Viết lại có thể hợp lý khi:
+
+- **Nền tảng đang chết** (ngôn ngữ, framework hay runtime không còn được hỗ trợ).
+- **Mục đích của sản phẩm đã thay đổi tận gốc**.
+- Codebase **đủ nhỏ** để viết lại mất vài tuần, không phải vài năm.
+
+Kể cả khi đó, cách an toàn nhất là **thay thế dần dần**, không phải viết lại một lần.
+
+## Công cụ hiện đại: mẫu strangler fig
+
+Martin Fowler đặt tên cho cách tiếp cận này theo cây sung bóp cổ (strangler fig) — loài cây mọc quấn quanh một cây khác cho tới khi thay thế nó:
+
+1. Đặt một **lớp định tuyến** (proxy, API gateway hoặc router) phía trước hệ thống cũ.
+2. Xây **một tính năng** trong hệ thống mới và chỉ chuyển lưu lượng của tính năng đó sang.
+3. Lặp lại, từng tính năng một, trong khi hệ thống cũ vẫn chạy.
+4. Cho hệ thống cũ nghỉ hưu khi không còn gì định tuyến tới nó.
+
+```ts
+// Next.js middleware: send migrated routes to the new app, everything else to legacy
+import { NextResponse, type NextRequest } from "next/server";
+
+const MIGRATED = ["/orders", "/account"];
+
+export function middleware(req: NextRequest) {
+  const isMigrated = MIGRATED.some((p) => req.nextUrl.pathname.startsWith(p));
+  if (isMigrated) return NextResponse.next(); // handled by the new app
+  return NextResponse.rewrite(new URL(req.nextUrl.pathname, process.env.LEGACY_URL));
+}
+```
+
+Người dùng vẫn tiếp tục nhận được giá trị, rủi ro nhỏ, và bạn có thể dừng bất cứ lúc nào.
+
+## Vì sao nó quan trọng khi có AI
+
+AI agent khiến việc viết lại *có vẻ* rẻ: "cứ nhờ agent viết lại module bằng framework mới." Nhưng điểm chính của Joel chưa bao giờ là về tốc độ gõ phím. Nó là về **tri thức ẩn trong code cũ**. Một agent viết lại module có thể âm thầm làm rơi đúng trường hợp đặc biệt đang giữ cho khách hàng lớn nhất của bạn hoạt động. Trước bất kỳ lần viết lại nào — do người hay do AI — hãy ghi lại hành vi hiện tại bằng **test**, rồi di chuyển theo từng bước nhỏ đã được kiểm chứng.
+
+## Bài học rút ra
+
+- Code cũ lộn xộn thường chứa tri thức từ thực tế; hãy tôn trọng nó.
+- Ưu tiên refactor và thay thế dần dần hơn là viết lại một lần.
+- Viết test ghi lại hành vi hiện có trước khi thay đổi code cũ.
+- Dùng mẫu strangler fig khi bạn thật sự cần một hệ thống mới.
+
+## Đọc bản gốc
+
+- [Joel Spolsky – Things You Should Never Do, Part I](https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/)
+- [Martin Fowler – Strangler Fig Application](https://martinfowler.com/bliki/StranglerFigApplication.html)
