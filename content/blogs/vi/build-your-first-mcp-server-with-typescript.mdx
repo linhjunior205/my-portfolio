@@ -1,0 +1,174 @@
+---
+title: "Giải thích Model Context Protocol: Tự viết MCP server đầu tiên bằng TypeScript"
+summary: "MCP đã trở thành chuẩn chung để kết nối AI agent với tool và dữ liệu. Bài này giải thích cách nó hoạt động và hướng dẫn từng bước viết một MCP server nhỏ bằng TypeScript."
+publishedAt: "2026-10-29"
+readTime: "10 phút đọc"
+tags: ["MCP", "AI Agents", "TypeScript", "Node.js", "Tutorial"]
+featured: true
+image: "/images/blogs/build-your-first-mcp-server-with-typescript/cover.png"
+author: "Linh Junior"
+---
+
+## MCP là gì?
+
+**Model Context Protocol (MCP)** là một giao thức mở do Anthropic giới thiệu cuối năm 2024, chuẩn hóa cách các ứng dụng AI kết nối với tool và dữ liệu bên ngoài. Hãy nghĩ về nó như **"cổng USB-C cho AI"**: thay vì viết tích hợp riêng cho từng model và từng tool, bạn viết một MCP server và mọi client hỗ trợ MCP đều dùng được.
+
+Đến năm 2026, MCP đã trở thành chuẩn trên thực tế. Nó được hỗ trợ bởi các hãng AI và editor lớn, nhiều báo cáo ghi nhận hơn 10.000 server công khai và hàng chục triệu lượt tải SDK mỗi tháng, và một khảo sát của Stacklok cho thấy khoảng 41% tổ chức phần mềm được hỏi đã chạy MCP server ở môi trường production (giới hạn hoặc rộng rãi).
+
+## Kiến trúc trong một phút
+
+Có ba vai trò:
+
+- **Host** – ứng dụng AI người dùng tương tác (app chat, IDE, coding agent).
+- **Client** – bộ kết nối bên trong host, giữ kết nối tới một server.
+- **Server** – chương trình của bạn, cung cấp khả năng cho model.
+
+Một server có thể cung cấp ba loại:
+
+- **Tools** – các hàm model có thể gọi, như `create_issue` hay `query_orders`.
+- **Resources** – dữ liệu chỉ đọc mà host nạp làm ngữ cảnh, như một file hay một bản ghi trong database.
+- **Prompts** – các mẫu prompt dùng lại được.
+
+Message dùng chuẩn **JSON-RPC 2.0**. Server thường chạy cục bộ qua **stdio** (host khởi động process của bạn và giao tiếp qua stdin/stdout) hoặc chạy từ xa qua **Streamable HTTP**.
+
+## Bắt tay vào làm
+
+Chúng ta sẽ viết một server nhỏ với hai tool: một tool đổi tiền tệ theo bảng tỷ giá cố định, và một tool tìm bài blog theo từ khóa. Cố tình làm đơn giản để dễ nhìn thấy giao thức.
+
+### 1. Khởi tạo dự án
+
+```bash
+mkdir mcp-demo && cd mcp-demo
+npm init -y
+npm install @modelcontextprotocol/sdk zod
+npm install -D typescript tsx @types/node
+```
+
+Thêm `"type": "module"` vào `package.json` để dùng được ES module import.
+
+### 2. Tạo server
+
+```ts
+// src/server.ts
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+
+const server = new McpServer({
+  name: "portfolio-demo",
+  version: "1.0.0",
+});
+
+// Tool 1: currency conversion
+const RATES_TO_USD: Record<string, number> = {
+  USD: 1,
+  EUR: 1.08,
+  VND: 0.000039,
+  JPY: 0.0066,
+};
+
+server.registerTool(
+  "convert_currency",
+  {
+    title: "Convert currency",
+    description: "Convert an amount between USD, EUR, VND and JPY using a fixed demo rate table.",
+    inputSchema: {
+      amount: z.number().positive(),
+      from: z.enum(["USD", "EUR", "VND", "JPY"]),
+      to: z.enum(["USD", "EUR", "VND", "JPY"]),
+    },
+  },
+  async ({ amount, from, to }) => {
+    const usd = amount * RATES_TO_USD[from];
+    const result = usd / RATES_TO_USD[to];
+    return {
+      content: [{ type: "text", text: `${amount} ${from} = ${result.toFixed(2)} ${to}` }],
+    };
+  }
+);
+
+// Tool 2: search blog posts
+const POSTS = [
+  { slug: "agentic-coding-in-2026", title: "Agentic Coding in 2026" },
+  { slug: "typescript-became-number-one-on-github", title: "TypeScript Became #1 on GitHub" },
+];
+
+server.registerTool(
+  "search_posts",
+  {
+    title: "Search blog posts",
+    description: "Find blog posts whose title contains the keyword.",
+    inputSchema: { keyword: z.string().min(1) },
+  },
+  async ({ keyword }) => {
+    const matches = POSTS.filter((p) =>
+      p.title.toLowerCase().includes(keyword.toLowerCase())
+    );
+    return {
+      content: [{ type: "text", text: JSON.stringify(matches, null, 2) }],
+    };
+  }
+);
+
+// Connect over stdio
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+Vài điểm cần chú ý:
+
+- **Phần mô tả rất quan trọng.** Model quyết định khi nào gọi tool bằng cách đọc tên và mô tả của nó, nên hãy viết như đang viết tài liệu cho đồng nghiệp.
+- **Zod schema được chuyển thành JSON Schema.** SDK tự chuyển đổi để client biết chính xác tham số nào hợp lệ, và input sai sẽ bị chặn trước khi tới handler của bạn.
+- **Đừng bao giờ ghi log ra stdout** trong server dùng stdio — stdout là kênh truyền message của giao thức. Hãy dùng `console.error` để log.
+
+### 3. Kiểm thử bằng MCP Inspector
+
+Inspector chính thức cung cấp giao diện để liệt kê và gọi thử tool mà không cần AI:
+
+```bash
+npx @modelcontextprotocol/inspector npx tsx src/server.ts
+```
+
+Mở URL được in ra, bấm **Connect**, rồi **List Tools**, và thử gọi `convert_currency` với `100`, `USD`, `VND`.
+
+### 4. Kết nối với AI client
+
+Phần lớn MCP host dùng một file cấu hình JSON để biết cách khởi động server của bạn. Thường trông như sau:
+
+```json
+{
+  "mcpServers": {
+    "portfolio-demo": {
+      "command": "npx",
+      "args": ["tsx", "/absolute/path/to/mcp-demo/src/server.ts"]
+    }
+  }
+}
+```
+
+Khởi động lại client và hỏi kiểu "250 EUR bằng bao nhiêu VND?". Model sẽ tự tìm thấy và gọi tool của bạn.
+
+## Checklist bảo mật
+
+MCP server trao cho model quyền thật, nên hãy đối xử với nó như mọi API công khai:
+
+- **Quyền tối thiểu** – chỉ mở những thao tác thực sự cần. Một user database chỉ có quyền đọc an toàn hơn kết nối quyền admin.
+- **Validate mọi input** – schema là lớp phòng thủ đầu tiên, không phải duy nhất.
+- **Hỏi xác nhận với thao tác nguy hiểm** như xóa dữ liệu hay gửi email.
+- **Cẩn thận với nội dung không tin cậy.** Text do tool trả về (trang web, comment issue, email) có thể chứa prompt injection. Đừng để output của một tool âm thầm kích hoạt một tool nguy hiểm khác.
+- **Không để lộ secret** trong output của tool hay trong log.
+
+## Bước tiếp theo
+
+- Thêm một **resource** cung cấp README hoặc tài liệu API của bạn.
+- Chuyển sang transport **Streamable HTTP** để deploy server từ xa.
+- Bọc một service NestJS có sẵn thành MCP server để agent dùng được logic nghiệp vụ thật của bạn.
+
+SDK thay đổi khá nhanh, nên hãy luôn xem tài liệu chính thức để biết API mới nhất trước khi đưa lên production.
+
+### Tài liệu tham khảo
+
+- [Model Context Protocol – Tài liệu chính thức](https://modelcontextprotocol.io)
+- [MCP TypeScript SDK trên GitHub](https://github.com/modelcontextprotocol/typescript-sdk)
+- [Stacklok – State of MCP in Software 2026](https://stacklok.com/resources/state-of-mcp-in-software-2026/)
+- [SerpApi – The state of MCP: everything that changed in H1 2026](https://serpapi.com/blog/the-state-of-mcp-everything-that-changed-in-h1-2026/)

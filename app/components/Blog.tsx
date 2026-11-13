@@ -159,6 +159,11 @@ export default function Blog() {
                             <Clock size={14} />
                             {post.readTime}
                           </span>
+                          {post.languages?.includes('vi') && (
+                            <span className="rounded-full border border-white/15 px-2 py-0.5 text-xs text-gray-300" title="Also available in Vietnamese">
+                              EN · VI
+                            </span>
+                          )}
                         </div>
                         <Link href={`/blog/${post.slug}`}>
                           <motion.h3
@@ -249,6 +254,11 @@ export default function Blog() {
                             <Clock size={14} />
                             {post.readTime}
                           </span>
+                          {post.languages?.includes('vi') && (
+                            <span className="rounded-full border border-white/15 px-2 py-0.5 text-xs text-gray-300" title="Also available in Vietnamese">
+                              EN · VI
+                            </span>
+                          )}
                         </div>
                         <Link href={`/blog/${post.slug}`}>
                           <motion.h3

@@ -42,6 +42,18 @@ const components = {
     p: ({ children }) => (<p className="mt-2 mb-3 leading-[175%]">{children}</p>),
     ul: ({ children }) => (<ul className="list-disc m-0 pl-5">{children}</ul>),
     li: ({ children }) => (<li className="p-0 pl-2 mb-3 marker:text-blue-400">{children}</li>),
+    a: ({ href = '', children }) => {
+        const external = /^https?:\/\//.test(href);
+        return (
+            <a
+                href={href}
+                className="text-blue-400 underline decoration-blue-400/40 underline-offset-4 transition-colors hover:text-blue-300 hover:decoration-blue-300"
+                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+            >
+                {children}
+            </a>
+        );
+    },
     Image: ({ src, alt, ...props }: ImageProps) => (<MDXImage src={src} alt={alt} {...props} />),
     Carousel: ({ images, ...props }: CarouselProps) => (
         <Carousel images={images} {...props} />

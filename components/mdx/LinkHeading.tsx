@@ -54,7 +54,7 @@ export default function LinkHeading({ children, as }: LinkHeadingProps) {
 
     return (
         <div className={`flex items-center group ${classMap[Component]}`}>
-            <Component id={id}>
+            <Component id={id} className="scroll-mt-24">
                 {children}
             </Component>
             <Button

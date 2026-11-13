@@ -9,6 +9,8 @@ export type BlogPost = {
   image: string;
   author: string;
   content: string;
+  // Present in public/blog-search-index.json: languages the post is available in
+  languages?: string[];
 }
 
 export type BlogMetadata = {

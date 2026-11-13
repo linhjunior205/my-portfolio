@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation } from 'framer-motion';
-import { ChevronDown, Github, Linkedin, Code, Sparkles, Zap, Rocket, Facebook } from 'lucide-react';
+import { ChevronDown, Github, Linkedin, Code, Sparkles, Zap, Rocket, Facebook, Download } from 'lucide-react';
 import * as THREE from 'three';
 import Link from 'next/link';
 import { baseInfo } from '@/content/informations/info';
@@ -380,6 +380,19 @@ export default function Hero() {
               Get In Touch
             </motion.span>
           </motion.a>
+
+          {baseInfo.cv && (
+            <motion.a
+              href={baseInfo.cv}
+              download
+              className="group flex items-center gap-2 px-8 py-4 border-2 border-white/20 hover:border-white/40 rounded-full font-semibold text-white bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Download size={18} className="group-hover:translate-y-0.5 transition-transform duration-300" />
+              Download CV
+            </motion.a>
+          )}
         </motion.div>
 
         {/* Social Links */}

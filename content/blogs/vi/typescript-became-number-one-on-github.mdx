@@ -1,0 +1,81 @@
+---
+title: "TypeScript lên #1 trên GitHub: Vì sao và điều đó có ý nghĩa gì"
+summary: "Báo cáo Octoverse 2025 của GitHub cho thấy TypeScript đã vượt Python và JavaScript về số người đóng góp mỗi tháng. Cùng xem vì sao ngôn ngữ có kiểu dữ liệu đang thắng thế trong thời đại AI."
+publishedAt: "2026-11-05"
+readTime: "6 phút đọc"
+tags: ["TypeScript", "JavaScript", "Programming Languages", "AI"]
+featured: true
+image: "/images/blogs/typescript-became-number-one-on-github/cover.png"
+author: "Linh Junior"
+---
+
+## Tin chính
+
+Trong báo cáo **Octoverse 2025**, GitHub công bố rằng vào tháng 8/2025, **TypeScript đã vượt cả Python và JavaScript** để trở thành ngôn ngữ được dùng nhiều nhất trên nền tảng, tính theo số người đóng góp mỗi tháng. Các bài viết về báo cáo cho biết TypeScript có khoảng 2,6 triệu người đóng góp mỗi tháng, tăng khoảng 66% so với năm trước.
+
+Cần hiểu chính xác con số này: bảng xếp hạng đo **số người viết code bằng ngôn ngữ đó**, không phải số dòng code, mức độ sử dụng khi chạy hay "ngôn ngữ tốt nhất". Python vẫn là vua của khoa học dữ liệu và machine learning. Nhưng nếu xem như tín hiệu về hướng đi của việc phát triển ứng dụng hằng ngày, đây là một tín hiệu lớn.
+
+## Vì sao TypeScript thắng
+
+### 1. Các framework biến nó thành mặc định
+
+Next.js, NestJS, Angular, Astro, SvelteKit, Remix và hầu hết các starter hiện đại đều tạo dự án TypeScript ngay từ đầu. Khi template mặc định là `.ts`, dự án mới tự nhiên là dự án TypeScript.
+
+### 2. Kiểu dữ liệu giúp AI viết code tốt hơn
+
+Đây là phần thú vị nhất trong phân tích của GitHub. Khi trợ lý AI sinh code, **kiểu dữ liệu đóng vai trò như một hợp đồng** mà model đọc được và compiler kiểm tra được. Một chữ ký hàm như dưới đây cho cả người lẫn agent biết chính xác điều gì được phép:
+
+```ts
+type CreateOrderInput = {
+  userId: string;
+  items: { productId: string; quantity: number }[];
+  couponCode?: string;
+};
+
+async function createOrder(input: CreateOrderInput): Promise<Order> {
+  // ...
+}
+```
+
+Nếu code sinh ra truyền `quantity` dạng chuỗi hoặc quên `userId`, `tsc` báo lỗi ngay lập tức. Vòng phản hồi nhanh đó chính là thứ agent cần để tự sửa. Trong codebase không có kiểu tĩnh, cùng lỗi đó có thể chỉ lộ ra khi chạy thật.
+
+### 3. Một ngôn ngữ từ database đến giao diện
+
+Với TypeScript, bạn có thể chia sẻ kiểu dữ liệu giữa backend (NestJS, Express, tRPC), frontend (React, Next.js) và cả mobile (React Native). Các công cụ như Prisma và Drizzle sinh kiểu trực tiếp từ schema database, nên việc đổi tên một cột sẽ thành lỗi compile trên toàn bộ stack thay vì lỗi trên production.
+
+### 4. Công cụ tốt hơn ở mọi nơi
+
+Gợi ý code trong editor, refactor an toàn, "go to definition" trong codebase lớn — tất cả đều hoạt động tốt hơn hẳn khi có kiểu dữ liệu. Node.js giờ chạy được nhiều file TypeScript trực tiếp bằng cách bỏ phần kiểu, và các công cụ nhanh như esbuild, SWC hay Bun khiến bước build gần như vô hình.
+
+## Ý nghĩa với lập trình viên
+
+- **Nếu bạn viết JavaScript, hãy học TypeScript cho đúng.** Không chỉ là thêm `: any` khắp nơi — hãy học generic, union type, narrowing và các utility type như `Partial`, `Pick`, `Omit`.
+- **Bật chế độ `strict`.** Phần lớn giá trị của TypeScript đến từ `strict: true` trong `tsconfig.json`.
+- **Validate ở biên hệ thống.** Kiểu dữ liệu biến mất khi chạy. Dùng thư viện schema như Zod để validate request body, biến môi trường và response từ API, rồi suy ra kiểu từ các schema đó.
+
+```ts
+import { z } from "zod";
+
+const SignUpSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+type SignUpInput = z.infer<typeof SignUpSchema>;
+
+export function parseSignUp(body: unknown): SignUpInput {
+  return SignUpSchema.parse(body); // throws on invalid input
+}
+```
+
+- **Python không đi đâu cả.** Với AI/ML, pipeline dữ liệu và script tự động, Python vẫn là lựa chọn thực tế. Nhiều team hiện chạy sản phẩm bằng TypeScript kèm các service Python cho phần model.
+
+## Kết luận
+
+TypeScript lên #1 trên GitHub không phải chuyện thổi phồng mà là một vòng lặp tự củng cố: framework mặc định dùng nó, kiểu dữ liệu giúp code do AI sinh ra an toàn hơn, và code an toàn hơn khiến các team càng dùng nó nhiều hơn. Với một lập trình viên full-stack năm 2026, TypeScript vững không còn là điểm cộng — nó là mức tối thiểu.
+
+### Tài liệu tham khảo
+
+- [GitHub Blog – Octoverse: A new developer joins GitHub every second as AI leads TypeScript to #1](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/)
+- [Visual Studio Magazine – TypeScript Tops GitHub Octoverse as AI Era Reshapes Language Choices](https://visualstudiomagazine.com/Articles/2025/10/31/TypeScript-Tops-GitHub-Octoverse-as-AI-Era-Reshapes-Language-Choices.aspx)
+- [It's FOSS – GitHub's 2025 Report Reveals Some Surprising Developer Trends](https://itsfoss.com/github-octoverse-2025/)

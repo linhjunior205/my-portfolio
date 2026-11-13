@@ -24,9 +24,10 @@ Next.js 14 App Router portfolio + blog. Content is **file-based MDX**, read from
 - Blog posts live in `content/blogs/*.mdx`; projects in `content/projects/*.mdx`. Each file has YAML frontmatter parsed by `gray-matter`. The frontmatter shape must match the `BlogPost` / `Project` types in `types/`.
 - `lib/blog.ts` and `lib/project.ts` are the only readers of this content. They do `fs.readdirSync`/`readFileSync` over the content dirs, so they are server-only (`lib/project.ts` is marked `"use server"`; project getters are wrapped in React `cache`). The filename (minus `.mdx`) becomes the slug.
 - Dynamic routes `app/blog/[slug]/page.tsx` and `app/project/[slug]/page.tsx` use `generateStaticParams` (from `getAllBlogSlugs`/`getAllProjectSlugs`) plus `generateMetadata`, and render content with `MDXRemote` from `next-mdx-remote/rsc`.
+- **Blog translations:** a Vietnamese version of a post lives at `content/blogs/vi/<same-slug>.mdx` and is served at `/blog/<slug>/vi/` (`app/blog/[slug]/vi/page.tsx`, `dynamicParams = false`). Both language routes render the shared server component `components/blog/BlogArticle.tsx` (TOC from `extractHeadings`, EN/VI switch, related posts via `getRelatedPosts`) with metadata from `components/blog/postMetadata.ts` (canonical + hreflang). Tags should stay identical across languages. Heading IDs come from `slugify` in `lib/utils.ts`, shared by the TOC and `components/mdx/LinkHeading`, so anchors match.
 
 ### Search (build-time index → client fetch)
-Search does **not** read MDX at runtime. `scripts/generate-blog-data.ts` calls `getAllBlogPosts()` and writes `public/blog-search-index.json`. The `build` script runs this first. The `useSearch` hook (`hooks/useSearch.ts`) fetches that static JSON client-side and queries it with Fuse.js. **Consequence:** after adding/editing a blog, the search index is stale until `generate-search` (or a full `build`) runs — `npm run dev` alone will not refresh search results. Projects are not indexed for search.
+Search does **not** read MDX at runtime. `scripts/generate-blog-data.ts` calls `getAllBlogPosts()` and writes `public/blog-search-index.json`. The `build` script runs this first. The `useSearch` hook (`hooks/useSearch.ts`) fetches that static JSON client-side and queries it with Fuse.js. **Consequence:** after adding/editing a blog, the search index is stale until `generate-search` (or a full `build`) runs — `npm run dev` alone will not refresh search results. Projects are not indexed for search. Translations are not indexed either; the index only records `languages` per post so cards can show an EN · VI badge.
 
 ### MDX rendering
 Custom MDX element mappings live in `app/mdx-component.tsx` (`useMDXComponents`): fenced code blocks route through `components/mdx/CodeSnippet`, headings get anchor links via `LinkHeading`, plus custom `Image` and `Carousel` components usable directly in MDX. `next.config.js` wires `@next/mdx` with `remark-gfm` and `rehype-highlight` and registers `.md`/`.mdx` as page extensions.
@@ -34,8 +35,11 @@ Custom MDX element mappings live in `app/mdx-component.tsx` (`useMDXComponents`)
 ### Static export config
 `next.config.js` sets `trailingSlash: true`, `images.unoptimized: true`, and `eslint.ignoreDuringBuilds: true` — the site is built for static hosting (deployed at linhjr205-portfolio.vercel.app), so avoid features that require a Node server at runtime.
 
+### SEO
+`app/sitemap.ts` and `app/robots.ts` generate `/sitemap.xml` and `/robots.txt` at build time from the content dirs (URLs keep the trailing slash). The home Open Graph image is the static `public/og-image.png`; blog posts use their cover image.
+
 ### Personal data
-All personal/site content (name, contact, socials, work `experiences[]`) is centralized in `content/informations/info.ts` as `baseInfo` and `experiences`. Components and page metadata import `baseInfo` from here rather than hardcoding.
+All personal/site content (name, contact, socials, CV path, work `experiences[]`, About text and stats) is centralized in `content/informations/info.ts` as `baseInfo` and `experiences`. `baseInfo.cv` points to a PDF in `public/` (the Hero "Download CV" button is hidden when it is empty). Components and page metadata import `baseInfo` from here rather than hardcoding.
 
 ### UI
 - The home page (`app/page.tsx`) composes section components from `app/components/` (Hero, About, Experiences, Projects, Blog, Contact, etc.). Page-specific sections live in `app/components/`; reusable primitives live in `components/`.
