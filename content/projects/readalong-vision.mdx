@@ -1,0 +1,61 @@
+---
+title: "ReadAlong Vision (ViRead)"
+summary: "A capstone web platform that helps Vietnamese parents read along with their children: books are digitized with an OCR + AI review pipeline, kids practise reading aloud with speech feedback, and parents follow progress through history and reports."
+image: "/images/projects/readalong-vision/cover.png"
+publishedAt: "2026-11-11"
+repo: "https://github.com/trancuong3/capstone1"
+category: "fullstack"
+tags: ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Supabase", "OCR", "AI"]
+featured: true
+teamSize: 6
+---
+
+## Overview
+
+**ReadAlong Vision** (internally *ViRead*) is our university capstone project: a responsive web platform that helps parents accompany their children while they learn to read Vietnamese books.
+
+Admins digitize picture books by scanning pages. The text is extracted with OCR and reviewed by a person before it is published. Children then read pages aloud in an interactive reading session, and parents can follow reading history, progress reports and the words their child still needs to practise.
+
+## Key features
+
+- **Parent and child accounts** – sign up, sign in and password recovery with Supabase Auth, plus parent and child profiles with avatar storage.
+- **Book library** – search, filter and view book details, with page-by-page content.
+- **Interactive reading session** – the child reads aloud, and the app records the attempt, transcribes it (speech-to-text), compares it with the page text and can read sentences back (text-to-speech).
+- **Reading history and progress reports** – every session is saved, with details per page, report periods to choose from, and a list of words to practise.
+- **Reading plans and email reminders** – weekly goals and scheduled reminder emails sent by a separate background worker, with retries.
+- **Admin workspace** – book and page management, OCR scanning, revision history, audit log and a system health screen.
+- **OCR with human review** – Tesseract, PaddleOCR and VietOCR read the scanned pages. An "AI fix" button suggests corrections through a chain of LLM providers (cloud models first, a local Ollama model last), and changes are applied only after an admin reviews them.
+
+## Tech stack
+
+- **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS, React Hook Form + Zod, Supabase SSR.
+- **Backend:** FastAPI, SQLAlchemy, PostgreSQL on Supabase, versioned SQL migrations.
+- **AI / OCR:** Tesseract, PaddleOCR (DBNet detection), VietOCR (a custom-trained V2 model), PyTorch, Ollama, cloud LLM fallback.
+- **Quality:** Vitest + Testing Library, Playwright end-to-end tests, pytest, and GitHub Actions workflows for frontend, backend and OCR verification.
+
+## My role
+
+I worked as a **full-stack developer** in a team of six, mainly on authentication, the parent-facing reading experience and data integration:
+
+- **Authentication and route protection** – integrated Supabase sessions and built role-based route guards for the Parent and Admin areas. Roles are read from the database on the server, never trusted from the browser.
+- **Moving from mock data to the real backend** – replaced the typed mock services with real FastAPI reads across the app, and later fixed duplicate sign-up for already confirmed accounts.
+- **Reading history** – persisted reading sessions with a detail view for each session.
+- **Progress reports** – showed the latest saved reports and let parents switch between report periods.
+- **Child reading experience** – completed the end-to-end reading flow:
+  - kept the first-attempt assessment when a child retries a page;
+  - made the recording, speech-to-text and text-to-speech lifecycles robust;
+  - kept page images bound to the OCR revision they came from;
+  - drew text overlays only when the box geometry could be trusted, and fell back to readable OCR text otherwise.
+- **Shared layout and code health** – built the shared header and footer, restored TypeScript type-checking, and migrated outdated mock-based tests.
+- **CI reliability** – fixed GitHub Actions workflows that failed when Ubuntu package mirrors were unreachable. The fix checks alternative mirrors without weakening signature verification, and comes with its own regression tests.
+
+## Engineering practices
+
+The team worked through feature branches and pull requests with a PR template, and every change had to pass formatting, lint, type-checking, tests and a production build. Before my reading-experience feature was merged, the full validation run covered **1,700+ frontend tests, 700+ backend tests and close to 100 browser tests**.
+
+## What I learned
+
+- Building real **authentication and authorization**: server-side session checks, roles kept in the database, and row-level security in Supabase.
+- Replacing mocks with a real API **without breaking the UI**, by keeping typed service interfaces between the two.
+- Designing user flows around **unreliable inputs** such as microphones, speech recognition and OCR boxes, so the app stays usable when one of them fails.
+- Treating **tests and CI as part of the feature**, not an afterthought.
